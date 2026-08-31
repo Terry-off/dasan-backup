@@ -1,0 +1,35 @@
+# GitHub Pages 를 "main 브랜치 / 루트" 소스로 활성화한다.
+# 최초 1회 활성화 목적이며, 활성화가 확인되면 이 파일은 삭제해도 된다.
+name: Enable GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pages 를 main / (root) 소스로 설정
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -o pipefail
+          BODY='{"source":{"branch":"main","path":"/"},"build_type":"legacy"}'
+
+          if gh api "/repos/$REPO/pages" >/dev/null 2>&1; then
+            echo "Pages 가 이미 존재합니다. 소스를 갱신합니다."
+            printf '%s' "$BODY" | gh api --method PUT "/repos/$REPO/pages" --input -
+          else
+            echo "Pages 를 새로 생성합니다."
+            printf '%s' "$BODY" | gh api --method POST "/repos/$REPO/pages" --input -
+          fi
+
+          echo "--- 현재 Pages 설정 ---"
+          gh api "/repos/$REPO/pages"
