@@ -45,6 +45,7 @@ grep -ohE '(src|href|data-src|data-original)=["'"'"'](/[^"'"'"']*)["'"'"']' tool
   echo "https://static.imweb.me/design-system/magnet/magnet.js"
   echo "https://static.imweb.me/design-system/magnet/magnet-node-webcomponent.js"
   echo "https://static.imweb.me/vendor/js/deploy_strategy.js"
+  echo "/_/oms-customer-front-office/app-DVxalUQO.js"
   echo "https://fonts.googleapis.com/earlyaccess/nanumgothic.css"
 } | sort -u > tools/lists/dl_all.txt
 rm -f tools/lists/_all.tmp
