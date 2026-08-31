@@ -14,9 +14,14 @@
 
 | 구분 | 주소 |
 |---|---|
-| 백업 사이트 | <https://terry-off.github.io/dasan-backup/> |
-| 관리자 페이지 | <https://terry-off.github.io/dasan-backup/admin/> |
+| **홈페이지** | <https://www.dasanbaruntong.com> |
+| **관리자 페이지** | <https://www.dasanbaruntong.com/admin/> |
+| GitHub 기본 주소 | <https://terry-off.github.io/dasan-backup/> |
 | GitHub 저장소 | <https://github.com/Terry-off/dasan-backup> |
+
+> `dasanbaruntong.com` (www 없는 주소) 로 들어와도 `www.dasanbaruntong.com` 으로 자동 이동합니다.
+> 도메인 설정은 예스닉(DNS) + GitHub Pages 양쪽에 되어 있으며, 저장소 루트의 `CNAME` 파일을
+> 지우면 도메인 연결이 끊기므로 삭제하지 마세요.
 
 <details>
 <summary>처음 설치할 때 했던 작업 (참고용)</summary>
@@ -184,9 +189,10 @@ git push
 
 ## 7. 알아두실 점
 
-- 이 백업 사이트는 **검색엔진 색인을 막아두었습니다** (`noindex`). 원본 사이트가 검색 순위에서
-  불이익을 받지 않도록 하기 위함입니다. 백업 사이트도 검색에 노출하고 싶다면
-  `tools/build.sh` 의 `noindex, nofollow` 부분을 지우고 다시 빌드하세요.
+- 이 사이트는 **본 홈페이지로 승격**되었습니다. 검색엔진 색인이 허용되어 있고,
+  각 페이지의 `canonical` · `og:url` 은 `https://www.dasanbaruntong.com` 기준으로 설정됩니다.
+  (`404.html` 과 `admin/` 만 색인 차단)
+- 원본 imweb 의 URL 형식(`/26`, `/52` 등)이 그대로 동작하므로 **기존 검색 결과와 외부 링크가 유지**됩니다.
 - **동작하지 않는 기능**: 회원 로그인, 장바구니 · 결제, 게시판 글쓰기, 예약 신청 등
   imweb 서버가 필요한 기능. 백업 사이트는 **보여주기 전용**입니다.
 - 메인화면 배경 영상은 유튜브 영상(`YsBSBZKxxA4`)을 그대로 사용합니다. 유튜브에서 영상을
