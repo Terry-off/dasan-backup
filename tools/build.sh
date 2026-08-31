@@ -34,6 +34,10 @@ for src in tools/source-pages/*.html; do
     # ---- 원본 imweb 팝업 블록 제거 (자체 팝업 시스템으로 대체) ----
     s{<div class="popup-banner-wrap">.*?(?=<div id="site_alarm_slidemenu_container")}{}s;
 
+    # ---- 푸터의 사업자/호스팅 정보 블록 제거 ----
+    #  (대표자 이메일 · "호스팅 제공자: (주)아임웹" 표기)
+    s{<div class="footer-company-info">.*?</div>}{}gs;
+
     # ---- 외부 추적/분석/CRM 스크립트 제거 ----
     s{<script[^>]*\bsrc=["\x27][^"\x27]*(?:crm-onsite|crm\.imweb|wcslog|googletagmanager|google-analytics|connect\.facebook|channel\.io)[^"\x27]*["\x27][^>]*>\s*</script>}{}gs;
     s{<script[^>]*>(?:(?!</script>).)*?(?:crm-onsite\.imweb\.me|static-cdn\.crm\.imweb\.me|wcs\.naver\.net|_wcs_do|gtag\()(?:(?!</script>).)*?</script>}{}gs;
