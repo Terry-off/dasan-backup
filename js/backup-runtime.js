@@ -238,6 +238,9 @@
       var el = e.target;
       if (el.closest && el.closest('#dbt-popup-layer')) return;
 
+      // 편집 중에는 링크를 눌러도 페이지가 이동하지 않도록 막는다
+      if (el.closest && el.closest('a')) e.preventDefault();
+
       if (editState.mode === 'image') {
         var img = (el.closest && el.closest('img')) ||
           (getComputedStyle(el).backgroundImage !== 'none' ? el : null);

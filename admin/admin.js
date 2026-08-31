@@ -340,8 +340,9 @@
     if (d.type === 'pick-image') {
       editing.key = d.key;
       editing.original = d.current;
-      $('#imgCurrent').src = d.current && d.current.indexOf('data:') === 0
-        ? d.current : '../' + String(d.current || '').replace(/^\.\.\//, '');
+      var cur = String(d.current || '');
+      $('#imgCurrent').src = cur.indexOf('data:') === 0 ? cur
+        : '../' + cur.replace(/^\.\//, '').replace(/^\.\.\//, '');
       $('#imgNew').hidden = true;
       $('#imgNewEmpty').hidden = false;
       $('#imgNew').removeAttribute('src');

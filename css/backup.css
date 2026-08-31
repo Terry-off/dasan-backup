@@ -119,4 +119,6 @@
   background-color: rgba(43, 108, 255, .07) !important;
 }
 
-.dbt-edit-on a { pointer-events: none; }
+/* 편집 모드에서는 링크 이동을 스크립트로 막는다 (pointer-events 는 쓰지 않음 —
+   링크 안의 글자도 클릭해서 수정할 수 있어야 하므로) */
+.dbt-edit-on a { cursor: pointer; }
