@@ -78,6 +78,8 @@ grep -rhoE 'https://fonts\.gstatic\.com/[^)]*' assets/fonts.googleapis.com 2>/de
 [ -s tools/lists/gstatic.txt ] && xargs -P 8 -I{} bash tools/fetch.sh "{}" < tools/lists/gstatic.txt
 
 echo "=== [5/6] CSS 경로 재작성 + JS 패치 ==="
+# .cm 은 GitHub Pages 가 text/css 로 주지 않으므로 .css 로 변경
+[ -f assets/dasanbaruntong.imweb.me/css/custom.cm ] && mv -f assets/dasanbaruntong.imweb.me/css/custom.cm assets/dasanbaruntong.imweb.me/css/custom.css || true
 bash tools/rewrite-css.sh
 bash tools/patch-assets.sh
 

@@ -58,6 +58,11 @@ for src in tools/source-pages/*.html; do
     # ---- 루트 상대 에셋 -> 로컬 assets ----
     s{(["\x27(])/(js|css|common|_|images|fonts)/}{$1./assets/dasanbaruntong.imweb.me/$2/}g;
 
+    # ---- custom.cm -> custom.css ----
+    #  GitHub Pages 는 .cm 을 application/octet-stream 으로 내려주어 브라우저가
+    #  스타일시트로 인정하지 않는다(폰트 크기·행간·자간이 전부 무시됨).
+    s{css/custom\.cm}{css/custom.css}g;
+
     # ---- 내부 페이지 링크 -> .html ----
     s{(href=["\x27])/(\d+)/\?[^"\x27]*}{$1$2.html}g;
     s{(href=["\x27])/shop_view/(\d+)}{$1shop_view_$2.html}g;
