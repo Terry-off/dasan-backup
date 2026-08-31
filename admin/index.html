@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>다산바른통의원 백업사이트 관리자</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">다산바른통의원 <span>백업사이트 관리자</span></div>
+  <div class="topbar-actions">
+    <span id="dirtyFlag" class="dirty" hidden>● 저장하지 않은 변경사항</span>
+    <button id="btnSave" class="btn btn-primary">저장하고 사이트에 반영</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="popup">팝업 관리</button>
+  <button class="tab" data-tab="content">사진 · 텍스트 수정</button>
+  <button class="tab" data-tab="setting">연결 설정</button>
+  <button class="tab" data-tab="help">사용 방법</button>
+</nav>
+
+<main>
+
+<!-- ============================ 팝업 관리 ============================ -->
+<section class="panel active" id="panel-popup">
+  <div class="panel-head">
+    <h2>팝업 관리</h2>
+    <button id="btnAddPopup" class="btn">+ 팝업 등록</button>
+  </div>
+  <p class="hint">메인 화면 등에 띄울 팝업입니다. 노출 기간을 정하면 그 기간에만 자동으로 표시되고, 기간이 지나면 자동으로 사라집니다.</p>
+  <div id="popupList" class="popup-list"></div>
+</section>
+
+<!-- ======================= 사진 · 텍스트 수정 ======================= -->
+<section class="panel" id="panel-content">
+  <div class="panel-head">
+    <h2>사진 · 텍스트 수정</h2>
+    <div class="content-controls">
+      <select id="pageSelect"></select>
+      <div class="mode-switch">
+        <button class="mode active" data-mode="text">텍스트 수정</button>
+        <button class="mode" data-mode="image">사진 교체</button>
+      </div>
+      <button id="btnResetPage" class="btn btn-ghost">이 페이지 수정 되돌리기</button>
+    </div>
+  </div>
+  <p class="hint" id="contentHint">아래 미리보기에서 바꾸고 싶은 <b>글자를 클릭</b>하세요. 편집창이 열립니다.</p>
+  <div class="preview-wrap">
+    <iframe id="previewFrame" title="사이트 미리보기"></iframe>
+  </div>
+</section>
+
+<!-- ============================ 연결 설정 ============================ -->
+<section class="panel" id="panel-setting">
+  <h2>연결 설정</h2>
+  <p class="hint">수정 내용을 GitHub 저장소에 바로 반영하기 위한 설정입니다. 이 정보는 <b>지금 사용 중인 브라우저에만</b> 저장되며 외부로 전송되지 않습니다.</p>
+  <div class="form">
+    <label>GitHub 사용자명 <input id="cfgOwner" placeholder="예: hongildong"></label>
+    <label>저장소 이름 <input id="cfgRepo" placeholder="예: dasan-backup"></label>
+    <label>브랜치 <input id="cfgBranch" value="main"></label>
+    <label>액세스 토큰 (Personal Access Token)
+      <input id="cfgToken" type="password" placeholder="github_pat_... 또는 ghp_...">
+    </label>
+    <div class="row">
+      <button id="btnTest" class="btn">연결 확인</button>
+      <button id="btnLogout" class="btn btn-ghost">토큰 지우기</button>
+      <span id="testResult" class="test-result"></span>
+    </div>
+  </div>
+  <div class="callout">
+    <b>토큰 만드는 방법</b>
+    <ol>
+      <li>GitHub 로그인 → 우측 상단 프로필 → <b>Settings</b></li>
+      <li>왼쪽 맨 아래 <b>Developer settings</b> → <b>Personal access tokens</b> → <b>Fine-grained tokens</b></li>
+      <li><b>Generate new token</b> → Repository access 에서 이 백업 저장소만 선택</li>
+      <li>Permissions → Repository permissions → <b>Contents</b> 를 <b>Read and write</b> 로 변경</li>
+      <li>생성된 토큰을 복사해 위 칸에 붙여넣기</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================ 사용 방법 ============================ -->
+<section class="panel" id="panel-help">
+  <h2>사용 방법</h2>
+  <div class="callout">
+    <ol>
+      <li><b>연결 설정</b> 탭에서 GitHub 정보와 토큰을 넣고 <b>연결 확인</b>을 누릅니다. (최초 1회만)</li>
+      <li><b>팝업 관리</b>에서 팝업을 등록·삭제하고 노출 기간을 지정합니다.</li>
+      <li><b>사진 · 텍스트 수정</b>에서 페이지를 고르고, 바꿀 글자나 사진을 클릭해 수정합니다.</li>
+      <li>오른쪽 위 <b>저장하고 사이트에 반영</b>을 누릅니다.</li>
+      <li>약 1분 뒤 실제 사이트에 반영됩니다. (GitHub Pages 배포 시간)</li>
+    </ol>
+  </div>
+  <div class="callout warn">
+    <b>참고</b>
+    <ul>
+      <li>수정 내용은 원본 HTML을 건드리지 않고 <code>data/site-config.json</code> 에만 저장됩니다. 언제든 되돌릴 수 있습니다.</li>
+      <li>이 관리자 페이지 주소를 아는 사람이 접속할 수는 있지만, <b>토큰이 없으면 아무것도 변경할 수 없습니다.</b></li>
+      <li>공용 PC에서 작업했다면 <b>연결 설정 → 토큰 지우기</b>를 눌러 주세요.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================ 팝업 편집 모달 ============================ -->
+<div class="modal" id="popupModal" hidden>
+  <div class="modal-box">
+    <h3 id="popupModalTitle">팝업 등록</h3>
+    <div class="form">
+      <label>팝업 이름 (관리용) <input id="pTitle" placeholder="예: 추석 휴진 안내"></label>
+
+      <label>팝업 이미지
+        <div class="img-picker">
+          <img id="pImgPreview" alt="" hidden>
+          <div class="img-picker-btns">
+            <input type="file" id="pImgFile" accept="image/*" hidden>
+            <button type="button" class="btn" id="btnPickImg">이미지 선택</button>
+            <button type="button" class="btn btn-ghost" id="btnClearImg">이미지 제거</button>
+          </div>
+        </div>
+      </label>
+
+      <label>또는 직접 쓸 내용 (이미지 없이 글로만 띄울 때)
+        <textarea id="pHtml" rows="3" placeholder="예: 8월 15일 광복절은 휴진입니다."></textarea>
+      </label>
+
+      <label>클릭 시 이동할 주소 (선택)
+        <input id="pLink" placeholder="예: 28.html 또는 https://blog.naver.com/dasanbon">
+      </label>
+      <label class="check"><input type="checkbox" id="pLinkNew"> 새 창으로 열기</label>
+
+      <div class="grid2">
+        <label>노출 시작일 <input type="date" id="pStart"></label>
+        <label>노출 종료일 <input type="date" id="pEnd"></label>
+      </div>
+      <p class="hint small">비워두면 기간 제한 없이 계속 노출됩니다.</p>
+
+      <label>노출할 페이지
+        <select id="pPages"></select>
+      </label>
+
+      <div class="grid3">
+        <label>가로 위치(px) <input type="number" id="pLeft" value="100"></label>
+        <label>세로 위치(px) <input type="number" id="pTop" value="100"></label>
+        <label>가로 크기(px) <input type="number" id="pWidth" value="450"></label>
+      </div>
+      <p class="hint small">모바일에서는 위치·크기와 상관없이 화면 가운데에 맞춰 표시됩니다.</p>
+
+      <div class="grid2">
+        <label>"보지 않음" 기간(일) <input type="number" id="pHideDays" value="1" min="1"></label>
+        <label class="check mt"><input type="checkbox" id="pEnabled" checked> 이 팝업 사용</label>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" id="btnPopupCancel">취소</button>
+      <button class="btn btn-primary" id="btnPopupOk">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ 텍스트 편집 모달 ============================ -->
+<div class="modal" id="textModal" hidden>
+  <div class="modal-box">
+    <h3>텍스트 수정</h3>
+    <p class="hint small">글자만 바꿔 주세요. 색·크기 등 서식은 그대로 유지됩니다.</p>
+    <textarea id="textEditor" rows="8"></textarea>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" id="btnTextRevert">원래대로</button>
+      <button class="btn btn-ghost" id="btnTextCancel">취소</button>
+      <button class="btn btn-primary" id="btnTextOk">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ 이미지 교체 모달 ============================ -->
+<div class="modal" id="imageModal" hidden>
+  <div class="modal-box">
+    <h3>사진 교체</h3>
+    <div class="img-compare">
+      <div><span>현재</span><img id="imgCurrent" alt=""></div>
+      <div><span>변경 후</span><img id="imgNew" alt="" hidden><div id="imgNewEmpty" class="img-empty">선택 전</div></div>
+    </div>
+    <input type="file" id="imgFile" accept="image/*" hidden>
+    <div class="modal-btns">
+      <button class="btn" id="btnImgPick">새 사진 선택</button>
+      <button class="btn btn-ghost" id="btnImgRevert">원래대로</button>
+      <button class="btn btn-ghost" id="btnImgCancel">취소</button>
+      <button class="btn btn-primary" id="btnImgOk">확인</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+<div id="busy" class="busy" hidden><div class="busy-box"><div class="spinner"></div><span id="busyText">처리 중…</span></div></div>
+
+<script src="admin.js"></script>
+</body>
+</html>

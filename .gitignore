@@ -1,0 +1,8 @@
+# 개발 도구 설정
+.claude/
+# 다운로드 실패 로그
+tools/lists/fetch_fail.log
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini

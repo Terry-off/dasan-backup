@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-31T00:00:00.000Z",
+  "popups": [
+    {
+      "id": "p-notice-1",
+      "title": "다산바른통의원 2층 안내",
+      "enabled": true,
+      "image": "assets/cdn.imweb.me/upload/S20251209f5fd7d3e70807/9e11a10374c1c.png",
+      "html": "",
+      "link": "",
+      "linkNewWindow": false,
+      "startDate": "",
+      "endDate": "",
+      "pages": ["index.html"],
+      "left": 100,
+      "top": 100,
+      "width": 450,
+      "hideForDays": 1
+    },
+    {
+      "id": "p-notice-2",
+      "title": "SA-3000 자율신경 검사 안내",
+      "enabled": true,
+      "image": "assets/cdn.imweb.me/upload/S20251209f5fd7d3e70807/0aba1a578a719.png",
+      "html": "",
+      "link": "",
+      "linkNewWindow": false,
+      "startDate": "",
+      "endDate": "",
+      "pages": ["index.html"],
+      "left": 570,
+      "top": 100,
+      "width": 450,
+      "hideForDays": 1
+    }
+  ],
+  "overrides": {}
+}

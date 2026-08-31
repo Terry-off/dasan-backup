@@ -1,0 +1,122 @@
+/* ============================================================
+ *  다산바른통의원 백업 사이트 - 팝업 / 편집모드 스타일
+ * ============================================================ */
+
+/* ---------------- 팝업 ---------------- */
+#dbt-popup-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100000;
+  pointer-events: none;
+}
+
+.dbt-popup {
+  position: absolute;
+  max-width: calc(100vw - 24px);
+  background: #fff;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, .22);
+  border-radius: 4px;
+  overflow: hidden;
+  pointer-events: auto;
+  font-family: 'Pretendard', 'Pretendard Variable', 'Apple SD Gothic Neo',
+    'Malgun Gothic', sans-serif;
+}
+
+.dbt-popup-body {
+  position: relative;
+  line-height: 0;
+}
+
+.dbt-popup-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.dbt-popup-html {
+  line-height: 1.6;
+  padding: 20px;
+  font-size: 15px;
+  color: #222;
+}
+
+.dbt-popup-link {
+  display: block;
+  text-decoration: none;
+}
+
+.dbt-popup-x {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .38);
+  color: #fff;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.dbt-popup-x:hover { background: rgba(0, 0, 0, .6); }
+
+.dbt-popup-btns {
+  display: flex;
+  border-top: 1px solid #e6e6e6;
+  background: #fafafa;
+}
+
+.dbt-popup-btns button {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 13px 6px;
+  font-size: 14px;
+  color: #444;
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.dbt-popup-btns button + button { border-left: 1px solid #e6e6e6; }
+.dbt-popup-btns button:hover { background: #f0f0f0; }
+
+/* 모바일: 화면 중앙 정렬 + 폭 자동 */
+@media (max-width: 767px) {
+  #dbt-popup-layer {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow-y: auto;
+    padding: 60px 12px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    background: rgba(0, 0, 0, .45);
+    pointer-events: auto;
+  }
+  #dbt-popup-layer:empty { display: none; }
+
+  .dbt-popup {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 420px;
+    flex: 0 0 auto;
+  }
+}
+
+/* ---------------- 편집 모드 ---------------- */
+.dbt-edit-on .dbt-hover {
+  outline: 2px dashed #2b6cff !important;
+  outline-offset: 2px;
+  cursor: pointer !important;
+  background-color: rgba(43, 108, 255, .07) !important;
+}
+
+.dbt-edit-on a { pointer-events: none; }
