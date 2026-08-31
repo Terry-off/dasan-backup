@@ -10,26 +10,37 @@
 
 ---
 
-## 1. GitHub 에 올리고 사이트 주소 만들기 (최초 1회)
+## 1. 사이트 주소
+
+| 구분 | 주소 |
+|---|---|
+| 백업 사이트 | <https://terry-off.github.io/dasan-backup/> |
+| 관리자 페이지 | <https://terry-off.github.io/dasan-backup/admin/> |
+| GitHub 저장소 | <https://github.com/Terry-off/dasan-backup> |
+
+<details>
+<summary>처음 설치할 때 했던 작업 (참고용)</summary>
+
+### GitHub 에 올리고 사이트 주소 만들기
 
 ### 1-1. 저장소 만들기
 
 1. GitHub 로그인 → 우측 상단 **+** → **New repository**
-2. Repository name: 예) `dasan-backup`
+2. Repository name: `dasan-backup`
 3. **Public** 선택 (Private 은 GitHub Pages 유료 요금제에서만 가능)
 4. README 등 다른 항목은 체크하지 말고 **Create repository**
 
 ### 1-2. 파일 올리기
 
 이 폴더에서 Git Bash 를 열고 아래를 실행합니다.
-(`사용자명`, `저장소명` 은 본인 것으로 바꾸세요.)
+
 
 ```bash
 git init
 git branch -M main
 git add -A
 git commit -m "다산바른통의원 백업 사이트 최초 등록"
-git remote add origin https://github.com/사용자명/저장소명.git
+git remote add origin https://github.com/Terry-off/dasan-backup.git
 git push -u origin main
 ```
 
@@ -43,14 +54,16 @@ git push -u origin main
 4. 1~2분 뒤 아래 주소로 접속됩니다.
 
 ```
-https://사용자명.github.io/저장소명/
+https://terry-off.github.io/dasan-backup/
 ```
 
 관리자 페이지 주소는 여기에 `admin/` 을 붙이면 됩니다.
 
 ```
-https://사용자명.github.io/저장소명/admin/
+https://terry-off.github.io/dasan-backup/admin/
 ```
+
+</details>
 
 ---
 
@@ -68,7 +81,14 @@ https://사용자명.github.io/저장소명/admin/
    - Permissions → Repository permissions → **Contents** → **Read and write**
 5. **Generate token** → 나온 토큰 문자열을 복사
 
-관리자 페이지 → **연결 설정** 탭에 사용자명 · 저장소명 · 토큰을 넣고 **연결 확인** 을 누르면 끝입니다.
+관리자 페이지 → **연결 설정** 탭에 아래처럼 넣고 **연결 확인** 을 누르면 끝입니다.
+
+| 항목 | 값 |
+|---|---|
+| GitHub 사용자명 | `Terry-off` |
+| 저장소 이름 | `dasan-backup` |
+| 브랜치 | `main` |
+| 액세스 토큰 | 위에서 복사한 토큰 |
 (토큰은 그 브라우저에만 저장되고 외부로 전송되지 않습니다.)
 
 ---
