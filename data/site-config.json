@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-02T14:40:36.702Z",
+  "updatedAt": "2026-09-02T14:40:55.601Z",
   "popups": [
     {
       "id": "p-notice-1",
@@ -51,7 +51,7 @@
       "pages": [
         "index.html"
       ],
-      "left": 1050,
+      "left": 1020,
       "top": 100,
       "width": 450,
       "hideForDays": 1
