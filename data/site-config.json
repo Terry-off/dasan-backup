@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-02T14:36:35.411Z",
+  "updatedAt": "2026-09-02T14:37:42.710Z",
   "popups": [
     {
       "id": "p-notice-1",
@@ -39,20 +39,20 @@
       "hideForDays": 1
     },
     {
-      "id": "p-mtk6xftp",
+      "id": "p-mtk79t5l",
       "title": "추석휴진",
       "enabled": true,
-      "image": "data/uploads/20260902142756-8hhe6.png",
+      "image": "data/uploads/20260902143722-fvmtd.png",
       "html": "",
       "link": "",
       "linkNewWindow": false,
-      "startDate": "2026-09-02",
+      "startDate": "2026-09-01",
       "endDate": "2026-09-27",
       "pages": [
         "index.html"
       ],
       "left": 100,
-      "top": 100,
+      "top": 700,
       "width": 450,
       "hideForDays": 1
     }
