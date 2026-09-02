@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-31T00:00:00.000Z",
+  "updatedAt": "2026-09-02T14:36:35.411Z",
   "popups": [
     {
       "id": "p-notice-1",
@@ -12,7 +12,9 @@
       "linkNewWindow": false,
       "startDate": "",
       "endDate": "",
-      "pages": ["index.html"],
+      "pages": [
+        "index.html"
+      ],
       "left": 100,
       "top": 100,
       "width": 450,
@@ -28,8 +30,28 @@
       "linkNewWindow": false,
       "startDate": "",
       "endDate": "",
-      "pages": ["index.html"],
+      "pages": [
+        "index.html"
+      ],
       "left": 570,
+      "top": 100,
+      "width": 450,
+      "hideForDays": 1
+    },
+    {
+      "id": "p-mtk6xftp",
+      "title": "추석휴진",
+      "enabled": true,
+      "image": "data/uploads/20260902142756-8hhe6.png",
+      "html": "",
+      "link": "",
+      "linkNewWindow": false,
+      "startDate": "2026-09-02",
+      "endDate": "2026-09-27",
+      "pages": [
+        "index.html"
+      ],
+      "left": 100,
       "top": 100,
       "width": 450,
       "hideForDays": 1
