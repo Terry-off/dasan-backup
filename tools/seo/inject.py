@@ -331,12 +331,10 @@ def faq_for(no):  # 구조화데이터용 (텍스트만)
                        .replace("</li>", "")).strip(" ·")) for q, a in qa_items(no)]
 
 
-def qa_html(no, band=True):
+def qa_html(no):
     rows = "".join(f'<details class="dbt-qa"><summary><span>{E(q)}</span></summary><div class="dbt-qa-a">{a}</div></details>'
                    for q, a in qa_items(no))
-    title = f"{page_name(no)} Q&amp;A" if no not in ("index", "guide") else "자주 묻는 질문"
-    band_html = (f'<div class="dbt-band"><h2>::: {title} :::</h2></div>' if band
-                 else f'<h2 class="dbt-sr">{title}</h2>')
+    label = "자주 묻는 질문" if no in ("index", "guide") else f"자주 묻는 질문 · {E(page_name(no))} Q&amp;A"
     rel = []
     if no in CONDITIONS and PARENT.get(no) in CATEGORIES:
         rel = [x for x in CATEGORIES[PARENT[no]]["children"] if x != no] + [PARENT[no]]
@@ -344,9 +342,10 @@ def qa_html(no, band=True):
         rel = list(CATEGORIES[no]["children"])
     rel += ["guide"] if no != "guide" else []
     chips = "".join(f'<a href="{href(n)}">{E(page_name(n))}</a>' for n in rel)
-    return (f'{band_html}<div class="dbt-qa-wrap"><div class="dbt-in">'
-            f'{rows}'
-            + (f'<div class="dbt-chips">{chips}</div>' if chips else "") + "</div></div>")
+    # 한 줄 버튼(접힘) → 누르면 Q&A 목록이 펼쳐짐. 내용은 HTML 에 그대로 있어 검색엔진·AI 는 모두 읽음
+    return (f'<div class="dbt-in"><details class="dbt-fold"><summary><h2>{label}</h2></summary>'
+            f'<div class="dbt-fold-body">{rows}'
+            + (f'<div class="dbt-chips">{chips}</div>' if chips else "") + "</div></details></div>")
 
 
 def section(no):
@@ -354,8 +353,7 @@ def section(no):
     if p.get("kind") == "noindex":
         return ""
     return ('<!--dbt-seo:body-start--><section class="dbt-seo" id="dbt-seo" aria-label="자주 묻는 질문">'
-            + qa_html(no, band=not p.get("has_qa_band")).replace('class="dbt-qa-wrap"', 'class="dbt-qa-wrap dbt-cont"' if p.get("has_qa_band") else 'class="dbt-qa-wrap"', 1)
-            + "</section><!--dbt-seo:body-end-->")
+            + qa_html(no) + "</section><!--dbt-seo:body-end-->")
 
 
 # ------------------------------------------------------------------ head
@@ -597,7 +595,7 @@ details{{border-bottom:1px solid var(--line);padding:10px 0}}summary{{cursor:poi
 {''.join(blocks)}
 <section class="g-cat"><h2>치료 방법</h2><p>{E(APPROACH)}</p>{treat_html()}</section>
 </main>
-<section class="dbt-seo">{qa_html('guide')}<div class="dbt-qa-wrap"><div class="dbt-in">{clinic_box()}</div></div></section>
+<section class="dbt-seo">{qa_html('guide')}<div class="dbt-in" style="padding-bottom:60px">{clinic_box()}</div></section>
 <footer style="text-align:center;padding:24px 16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)">
 {BRAND} · 대표 {DOCTOR['name']} · 사업자등록번호 {CLINIC['biz_no']} · {E(CLINIC['address_full'])} · T. {CLINIC['phone']} · F. {CLINIC['fax']}</footer>
 </body>

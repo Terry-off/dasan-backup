@@ -143,22 +143,29 @@
 .dbt-seo a { color: #2b529f; text-decoration: none; }
 .dbt-seo a:hover { text-decoration: underline; }
 
-/* 남색 띠 */
-.dbt-seo .dbt-band {
-  background: #263a66;
-  background-image: linear-gradient(112deg, rgba(255,255,255,0) 0 60%, rgba(255,255,255,.035) 60% 78%, rgba(0,0,0,.06) 78%);
-  padding: 48px 16px; text-align: center;
+/* 한 줄 접기 버튼 (오시는 길 바로 위) */
+.dbt-seo { padding: 40px 0; }
+.dbt-seo .dbt-fold { border-top: 1px solid #e3e3e3; border-bottom: 1px solid #e3e3e3; }
+.dbt-seo .dbt-fold > summary {
+  list-style: none; cursor: pointer; position: relative; padding: 18px 56px 18px 10px;
 }
-.dbt-seo .dbt-band h2 {
-  margin: 0; color: #fff; font-size: 26px; line-height: 31.2px; font-weight: 700; font-family: inherit;
+.dbt-seo .dbt-fold > summary::-webkit-details-marker { display: none; }
+.dbt-seo .dbt-fold > summary h2 {
+  margin: 0; font-family: inherit; font-size: 16px; line-height: 22px; font-weight: 400; color: #888787;
 }
+.dbt-seo .dbt-fold > summary::after {
+  content: ""; position: absolute; right: 24px; top: 50%; width: 9px; height: 9px; margin-top: -7px;
+  border-right: 1.5px solid #888787; border-bottom: 1.5px solid #888787; transform: rotate(45deg); transition: transform .2s;
+}
+.dbt-seo .dbt-fold[open] > summary::after { transform: rotate(-135deg); margin-top: -2px; }
+.dbt-seo .dbt-fold > summary:hover h2, .dbt-seo .dbt-fold[open] > summary h2 { color: #2b529f; }
+.dbt-seo .dbt-fold-body { padding: 10px 0 40px; }
 
 /* Q&A */
-.dbt-seo .dbt-qa-wrap { padding: 100px 0 110px; }
-.dbt-seo .dbt-qa-wrap.dbt-cont { padding-top: 0; margin-top: -40px; }
 .dbt-seo .dbt-in { max-width: 1250px; margin: 0 auto; padding: 0 16px; }
 @media (min-width: 1282px) { .dbt-seo .dbt-in { padding: 0; } }
 .dbt-seo .dbt-qa { border-top: 1px solid #363636; }
+.dbt-seo .dbt-qa:first-child { border-top: 0; }
 .dbt-seo .dbt-qa:last-of-type { border-bottom: 1px solid #363636; }
 .dbt-seo .dbt-qa > summary {
   list-style: none; cursor: pointer; position: relative;
@@ -193,9 +200,10 @@
 .dbt-seo .dbt-muted { color: #888787; }
 
 @media (max-width: 767px) {
-  .dbt-seo .dbt-band { padding: 30px 16px; }
-  .dbt-seo .dbt-band h2 { font-size: 18px; line-height: 21.6px; }
-  .dbt-seo .dbt-qa-wrap { padding: 50px 0 60px; }
+  .dbt-seo { padding: 24px 0; }
+  .dbt-seo .dbt-fold > summary { padding: 15px 40px 15px 4px; }
+  .dbt-seo .dbt-fold > summary h2 { font-size: 14px; }
+  .dbt-seo .dbt-fold > summary::after { right: 12px; }
   .dbt-seo .dbt-qa > summary { font-size: 16px; line-height: 22px; padding: 14px 40px 14px 4px; }
   .dbt-seo .dbt-qa > summary::after { right: 12px; width: 9px; height: 9px; margin-top: -7px; }
   .dbt-seo .dbt-qa-a { padding: 2px 4px 20px; font-size: 14px; line-height: 25.2px; }
