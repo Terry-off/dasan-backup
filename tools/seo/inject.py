@@ -375,6 +375,7 @@ def head_block(no, robots=None):
         f'<meta name="robots" content="{robots or "index,follow,max-image-preview:large,max-snippet:-1"}">',
         f'<link rel="canonical" href="{canon}">',
         '<meta name="msvalidate.01" content="DECADF80FB530828B261751251BE058E">',
+        '<meta name="google-site-verification" content="MXNTvfdqUY2NKNw6WL8QxBepAKTgqdxI5pAMCOT1KMQ">',
         '<meta property="og:locale" content="ko_KR">',
         f'<meta property="og:site_name" content="{BRAND}">',
         f'<meta property="og:title" content="{E(p["title"])}">',
