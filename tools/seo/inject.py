@@ -158,31 +158,6 @@ def condition_node(no):
     return node
 
 
-def faq_for(no):
-    if no in CONDITIONS:
-        c = CONDITIONS[no]
-        nm = c["name"]
-        return [
-            (f"다산동·다산신도시 근처에서 {nm} 치료는 어디서 받을 수 있나요?",
-             f"경기도 남양주시 다산지금로 130 하나로프라자II 2층의 {BRAND}에서 {nm} 진료를 합니다. "
-             f"통증의 원인을 진찰한 뒤 통사치료, 스네피(SNEPI) 자율신경 주사 등 비수술 치료로 관리합니다. 전화 {CLINIC['phone']}."),
-            (f"{j(nm, '은', '는')} 꼭 수술해야 하나요?",
-             f"증상과 진행 정도에 따라 다릅니다. 비수술 치료로 호전을 기대할 수 있는 경우가 있어 {BRAND}에서는 진찰 후 "
-             "필요한 치료만 권합니다. 진찰 결과 정밀 영상검사나 수술이 필요한 소견이 있으면 적합한 상급 의료기관으로 안내합니다."),
-            (f"{j(nm, '이', '가')} 의심되면 언제 진료를 받아야 하나요?",
-             f"'{c['symptoms'][0]}', '{c['symptoms'][1]}' 같은 증상이 2주 이상 계속되거나 일상생활이 불편하다면 "
-             "진료를 받아 보시는 것이 좋습니다. 초기에 원인을 확인할수록 관리가 수월합니다."),
-        ] + GLOBAL_FAQ[2:3]
-    if no in CATEGORIES:
-        cat = CATEGORIES[no]
-        names = ", ".join(page_name(x) for x in cat["children"])
-        return [
-            (f"다산동에서 {cat['name']} 진료하는 병원이 있나요?",
-             f"남양주 다산지금로 130의 {BRAND}에서 {cat['name']}({names})을 비수술로 진료합니다. 전화 {CLINIC['phone']}."),
-        ] + GLOBAL_FAQ[1:3]
-    if no == "index" or no == "guide":
-        return GLOBAL_FAQ
-    return GLOBAL_FAQ[:4]
 
 
 def jsonld(no):
@@ -219,36 +194,19 @@ def jsonld(no):
     return json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False, indent=1)
 
 
-# ------------------------------------------------------------------ 본문 텍스트 섹션
-def clinic_box():
+# ------------------------------------------------------------------ 본문 텍스트 섹션 (사이트 Q&A 디자인)
+LOCWORD = "남양주 다산동"
+ALL_COND_LINKS = ["59", "60", "61", "62", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74"]
+HOURS_TXT = ("월·목·금 09:00~18:00, 화요일 09:00~20:00(야간진료), 수요일 09:00~13:00(오전진료), "
+             "토요일 09:00~14:00 / 점심시간 13:00~14:00 / 일요일·공휴일 휴진")
+
+
+def clinic_box():  # guide.html 전용 (다른 페이지는 원래의 '오시는 길' 섹션이 있음)
     rows = "".join(f"<li>{E(h[3])}</li>" for h in CLINIC["hours"])
-    notes = "".join(f"<li class=\"dbt-seo-muted\">{E(n)}</li>" for n in CLINIC["hours_notes"])
-    return f"""
-<div class="dbt-seo-clinic">
-  <div>
-    <h3>{BRAND} 진료 안내</h3>
-    <p><strong>주소</strong> {E(CLINIC['address_full'])}<br>
-    <strong>전화</strong> <a href="tel:{CLINIC['phone']}">{CLINIC['phone']}</a><br>
-    <strong>주차</strong> {E(CLINIC['parking'])}<br>
-    <strong>진료 지역</strong> {E(CLINIC['area_words'])} · 구리 · 별내</p>
-    <p><a class="dbt-seo-btn" href="tel:{CLINIC['phone']}">전화 문의</a>
-       <a class="dbt-seo-btn dbt-seo-btn-line" href="{CLINIC['map']}" target="_blank" rel="noopener">지도 보기</a></p>
-  </div>
-  <div>
-    <h3>진료시간</h3>
-    <ul class="dbt-seo-hours">{rows}{notes}</ul>
-  </div>
-</div>"""
-
-
-def faq_html(no):
-    items = "".join(f"<details><summary>{E(q)}</summary><p>{E(a)}</p></details>" for q, a in faq_for(no))
-    return f"<h3>자주 묻는 질문</h3><div class=\"dbt-seo-faq\">{items}</div>"
-
-
-def links_html(nos, title):
-    lis = "".join(f'<li><a href="{href(n)}">{E(page_name(n))}</a></li>' for n in nos)
-    return f'<h3>{E(title)}</h3><ul class="dbt-seo-links">{lis}</ul>'
+    notes = "".join(f"<li class=\"dbt-muted\">{E(n)}</li>" for n in CLINIC["hours_notes"])
+    return f"""<div class="dbt-clinic"><div><h3>{BRAND}</h3>
+<p>{E(CLINIC['address_full'])}<br>T. <a href="tel:{CLINIC['phone']}">{CLINIC['phone']}</a><br>{E(CLINIC['parking'])}</p></div>
+<div><h3>진료시간</h3><ul>{rows}{notes}</ul></div></div>"""
 
 
 def ul(items):
@@ -256,102 +214,145 @@ def ul(items):
 
 
 def treat_html():
-    return ("<ul class=\"dbt-seo-treat\">" + "".join(
-        f'<li><a href="{href(p)}"><strong>{E(n)}</strong></a> – {E(d)}</li>' for n, p, d in TREATMENTS) + "</ul>")
+    return "<ul>" + "".join(
+        f'<li><a href="{href(p)}">{E(n)}</a> – {E(d)}</li>' for n, p, d in TREATMENTS) + "</ul>"
 
 
-ALL_COND_LINKS = ["59", "60", "61", "62", "63", "64", "65", "66", "67", "68", "69", "70", "71", "72", "73", "74"]
+def treat_text():
+    return " ".join(f"{n}: {d}" for n, _, d in TREATMENTS)
+
+
+def P(t):
+    return f"<p>{E(t)}</p>"
+
+
+def where_qa(subject):
+    return (f"다산동·다산신도시에서 {subject} 진료는 어디서 받을 수 있나요?",
+            P(f"{BRAND}에서 진료합니다. 주소는 {CLINIC['address_full']}이며 건물 내 주차가 가능합니다. "
+              f"남양주 다산동·지금동·도농동과 구리, 별내 등 인근 지역에서 찾아오십니다. 전화 {CLINIC['phone']}."))
+
+
+def hours_qa():
+    return (f"{BRAND} 진료시간과 위치는 어떻게 되나요?",
+            P(f"{HOURS_TXT}. 위치: {CLINIC['address_full']} (건물 내 주차). 전화 {CLINIC['phone']}."))
+
+
+def qa_items(no):
+    """(질문, 답변 HTML) 목록 — 화면의 Q&A 와 FAQPage 구조화데이터가 같은 내용을 쓴다."""
+    items = []
+    if no in CONDITIONS:
+        c = CONDITIONS[no]
+        nm = c["name"]
+        items.append((f"{j(nm, '이란', '란')} 무엇인가요? ({', '.join(c['alt'][:3])})",
+                      P(c["summary"]) + P(f"다른 이름: {', '.join(c['alt'])}. 관련 부위: {c['anatomy']}.")))
+        items.append((f"{nm} 증상은 어떤가요?",
+                      ul(c["symptoms"]) + P(f"위와 같은 {c['part']} 통증·불편감이 계속된다면 {j(nm, '을', '를')} 의심해 볼 수 있습니다.")))
+        items.append((f"{j(nm, '은', '는')} 왜 생기나요? (원인)", ul(c["causes"]) + (P(c["note"]) if c.get("note") else "")))
+        if c.get("stages"):
+            items.append((f"{nm} 진행 단계는 어떻게 나뉘나요?", ul(c["stages"])))
+        if c.get("types"):
+            items.append(("신경통에는 어떤 종류가 있나요? (좌골신경통·삼차신경통·늑간신경통)",
+                          "<ul>" + "".join(f"<li><b>{E(x)}</b> – {E(y)}</li>" for x, y in c["types"]) + "</ul>"))
+        items.append(where_qa(nm))
+        items.append((f"{BRAND}에서는 {j(nm, '을', '를')} 어떻게 치료하나요?", P(APPROACH) + treat_html()))
+        items.append((f"{j(nm, '은', '는')} 꼭 수술해야 하나요? 비수술 치료가 가능한가요?",
+                      P(f"증상과 진행 정도에 따라 다릅니다. 비수술 치료로 호전을 기대할 수 있는 경우가 있어 {BRAND}에서는 "
+                        "진찰 후 통사치료, 스네피(SNEPI) 자율신경 주사, 자세·생활습관 교정 중 필요한 치료만 권합니다. "
+                        "진찰 결과 정밀 영상검사나 수술이 필요한 소견이 있으면 적합한 상급 의료기관으로 안내합니다.")))
+        items.append((f"{j(nm, '이', '가')} 의심되면 언제 병원에 가야 하나요?",
+                      P(f"'{c['symptoms'][0]}', '{c['symptoms'][1]}' 같은 증상이 2주 이상 계속되거나 일상생활이 불편하다면 "
+                        "진료를 받아 보시는 것이 좋습니다. 초기에 원인을 확인할수록 관리가 수월합니다.")))
+        items.append(hours_qa())
+    elif no in CATEGORIES:
+        cat = CATEGORIES[no]
+        names = ", ".join(page_name(x) for x in cat["children"])
+        items.append((f"{cat['name']}의 원인 질환에는 무엇이 있나요?",
+                      P(cat["intro"]) + "<ul>" + "".join(f'<li><a href="{href(x)}">{E(page_name(x))}</a></li>'
+                                                         for x in cat["children"]) + "</ul>"))
+        for ch in cat["children"]:
+            if ch in CONDITIONS:
+                c = CONDITIONS[ch]
+                items.append((f"{j(c['name'], '이란', '란')}? 주요 증상은?",
+                              P(c["summary"]) + P("주요 증상: " + ", ".join(c["symptoms"]) + ".") +
+                              f'<p><a href="{href(ch)}">{E(c["name"])} 자세히 보기</a></p>'))
+            else:
+                items.append((f"{CATEGORIES[ch]['name']} 진료 안내",
+                              P(CATEGORIES[ch]["intro"]) + f'<p><a href="{href(ch)}">자세히 보기</a></p>'))
+        items.append(where_qa(cat["name"]))
+        items.append((f"{BRAND}의 {cat['name']} 치료 방법은?", P(APPROACH) + treat_html()))
+        items.append(hours_qa())
+    elif no in ("index", "guide"):
+        items.append((f"{j(BRAND, '은', '는')} 어떤 병원인가요?",
+                      P(f"{BRAND}은 경기도 남양주시 다산동(다산신도시) 다산지금로 130 하나로프라자II 2층에 있는 통증·내과 의원입니다. "
+                        "목·허리·어깨·무릎·팔꿈치·손목·발목 등 정형외과 영역의 근골격계 통증과 신경통을 수술 없이 치료하고, "
+                        "만성질환·감기·위장질환 등 내과 진료와 영양수액, 예방접종을 함께 합니다.")))
+        parts = "".join(
+            f'<li><a href="{href(c)}"><b>{E(CATEGORIES[c]["name"])}</b></a> – ' +
+            ", ".join(f'<a href="{href(x)}">{E(CONDITIONS[x]["name"])}</a>' for x in CATEGORIES[c]["children"]) + "</li>"
+            for c in ["52", "53", "54", "55", "56", "57", "58"])
+        items.append(("어떤 통증 질환을 진료하나요? (목·허리·어깨·무릎·손목·발목)", f"<ul>{parts}</ul>"))
+        items.append(("치료 방법은 무엇인가요? (통사치료 · 스네피 주사 · 수액)", P(APPROACH) + treat_html()))
+        items.append((f"대표원장은 누구인가요?",
+                      P(f"대표원장 {DOCTOR['name']}입니다.") + ul(DOCTOR["career"])))
+        items.append(where_qa("목·허리·어깨·무릎 통증"))
+        for q, a in GLOBAL_FAQ[1:]:
+            items.append((q, P(a)))
+    elif PAGES.get(no, {}).get("kind") == "service":
+        svc = PAGES[no].get("svc")
+        d = {n: x for n, _, x in TREATMENTS}
+        what = {"자율신경치료": d["통사치료"] + " " + d["스네피(SNEPI) 자율신경 주사"] + " " + d["자율신경 검사 (SA-3000)"],
+                "통사치료": d["통사치료"], "스네피 주사": d["스네피(SNEPI) 자율신경 주사"],
+                "수액클리닉": d["영양수액 · 통증케어 수액"] + " 독감·대상포진·파상풍·폐렴구균 예방접종과 SA-3000 자율신경 검사도 합니다.",
+                "내과": d["내과 진료"]}[svc]
+        nm = page_name(no)
+        items.append((f"다산 {nm} – 어떤 진료인가요?", P(what)))
+        if svc != "내과":
+            items.append((f"{nm}는 어떤 통증에 적용하나요?",
+                          P("목·허리·어깨·무릎·손목·발목 통증과 신경통, 손발 저림, 두통 등에 적용합니다.") +
+                          "<p>" + " · ".join(f'<a href="{href(x)}">{E(page_name(x))}</a>' for x in ALL_COND_LINKS) + "</p>"))
+        items.append(where_qa(nm))
+        items.append(hours_qa())
+    else:  # about / doctor / contact
+        if PAGES.get(no, {}).get("kind") == "doctor":
+            items.append((f"{BRAND} 대표원장 {DOCTOR['name']} 약력은?", ul(DOCTOR["career"])))
+        items.append((f"{BRAND}의 진료 원칙은 무엇인가요?", P(APPROACH)))
+        items.append(("어떤 진료를 하나요?", treat_html()))
+        items.append(where_qa("통증"))
+        items.append(hours_qa())
+        items.append(GLOBAL_FAQ[4][0:1] + (P(GLOBAL_FAQ[4][1]),))
+    return items
+
+
+def faq_for(no):  # 구조화데이터용 (텍스트만)
+    return [(q, re.sub(r"\s+", " ", html.unescape(re.sub(r"<li>", " · ", re.sub(r"<(?!li)[^>]+>", " ", a)))
+                       .replace("</li>", "")).strip(" ·")) for q, a in qa_items(no)]
+
+
+def qa_html(no, band=True):
+    rows = "".join(f'<details class="dbt-qa"><summary><span>{E(q)}</span></summary><div class="dbt-qa-a">{a}</div></details>'
+                   for q, a in qa_items(no))
+    title = f"{page_name(no)} Q&amp;A" if no not in ("index", "guide") else "자주 묻는 질문"
+    band_html = (f'<div class="dbt-band"><h2>::: {title} :::</h2></div>' if band
+                 else f'<h2 class="dbt-sr">{title}</h2>')
+    rel = []
+    if no in CONDITIONS and PARENT.get(no) in CATEGORIES:
+        rel = [x for x in CATEGORIES[PARENT[no]]["children"] if x != no] + [PARENT[no]]
+    elif no in CATEGORIES:
+        rel = list(CATEGORIES[no]["children"])
+    rel += ["guide"] if no != "guide" else []
+    chips = "".join(f'<a href="{href(n)}">{E(page_name(n))}</a>' for n in rel)
+    return (f'{band_html}<div class="dbt-qa-wrap"><div class="dbt-in">'
+            f'{rows}'
+            + (f'<div class="dbt-chips">{chips}</div>' if chips else "") + "</div></div>")
 
 
 def section(no):
     p = PAGES.get(no, {})
-    kind = p.get("kind")
-    if kind == "noindex":
+    if p.get("kind") == "noindex":
         return ""
-    out = []
-    if no in CONDITIONS:
-        c = CONDITIONS[no]
-        nm = c["name"]
-        out.append(f'<p class="dbt-seo-eyebrow">{BRAND} 통증클리닉 · {E(c["part"])} 통증 · {E(c["tagline"])}</p>')
-        out.append(f"<h2>{E(j(nm, '이란', '란'))}? <small>({E(', '.join(c['alt']))})</small></h2>")
-        out.append(f"<p>{E(c['summary'])}</p>")
-        if c.get("stages"):
-            out.append(f"<h3>{E(nm)} 진행 단계</h3>" + ul(c["stages"]))
-        if c.get("types"):
-            out.append("<h3>대표적인 신경통</h3><ul>" + "".join(
-                f"<li><strong>{E(a)}</strong> – {E(b)}</li>" for a, b in c["types"]) + "</ul>")
-        out.append('<div class="dbt-seo-cols"><div>')
-        out.append(f"<h3>{E(nm)} 주요 증상</h3>" + ul(c["symptoms"]))
-        out.append("</div><div>")
-        out.append(f"<h3>{E(nm)} 원인</h3>" + ul(c["causes"]))
-        out.append("</div></div>")
-        if c.get("note"):
-            out.append(f'<p class="dbt-seo-note">{E(c["note"])}</p>')
-        out.append(f"<h3>{BRAND}의 {E(nm)} 치료</h3><p>{E(APPROACH)}</p>" + treat_html())
-        out.append(faq_html(no))
-        sib = [x for x in CATEGORIES[PARENT[no]]["children"] if x != no] if no in PARENT and PARENT[no] in CATEGORIES else []
-        out.append(links_html(sib + [PARENT.get(no, "51"), "guide", "28"], "함께 보면 좋은 진료 안내"))
-    elif no in CATEGORIES:
-        cat = CATEGORIES[no]
-        out.append(f'<p class="dbt-seo-eyebrow">{BRAND} 통증클리닉 · {LOCWORD}</p>')
-        out.append(f"<h2>다산 {E(cat['name'])} 진료 안내</h2><p>{E(cat['intro'])}</p>")
-        out.append('<div class="dbt-seo-cards">')
-        for ch in cat["children"]:
-            if ch in CONDITIONS:
-                c = CONDITIONS[ch]
-                out.append(f'<a class="dbt-seo-card" href="{href(ch)}"><strong>{E(c["name"])}</strong>'
-                           f'<span>{E(c["summary"][:80])}…</span></a>')
-            else:
-                out.append(f'<a class="dbt-seo-card" href="{href(ch)}"><strong>{E(CATEGORIES[ch]["name"])}</strong>'
-                           f'<span>{E(CATEGORIES[ch]["intro"][:80])}…</span></a>')
-        out.append("</div>")
-        out.append(f"<h3>{BRAND}의 치료 원칙</h3><p>{E(APPROACH)}</p>" + treat_html())
-        out.append(faq_html(no))
-        out.append(links_html(["guide", "50", "49", "28"], "더 알아보기"))
-    elif kind == "home":
-        out.append(f'<p class="dbt-seo-eyebrow">{LOCWORD} · 통증의원 · 내과</p>')
-        out.append(f"<h2>{BRAND} 진료 안내</h2>")
-        out.append(f"<p>{BRAND}은 경기도 남양주시 다산동(다산신도시) 다산지금로 130 하나로프라자II 2층에 있는 통증·내과 의원입니다. "
-                   "목·허리·어깨·무릎·팔꿈치·손목·발목 등 정형외과 영역의 근골격계 통증과 신경통을 수술 없이 치료하며, "
-                   "만성질환·감기·위장질환 등 내과 진료와 영양수액, 예방접종을 함께 합니다. "
-                   f"대표원장 {DOCTOR['name']}은 경희의료원에서 전문의를 취득하고 응급의료센터 센터장을 지냈으며 대한정형통증의학회 정회원입니다.</p>")
-        out.append("<h3>부위별 통증 진료</h3><div class=\"dbt-seo-cards\">")
-        for cno in ["52", "53", "54", "55", "56", "57", "58"]:
-            cat = CATEGORIES[cno]
-            kids = " · ".join(CONDITIONS[x]["name"] for x in cat["children"])
-            out.append(f'<a class="dbt-seo-card" href="{href(cno)}"><strong>{E(cat["name"])}</strong><span>{E(kids)}</span></a>')
-        out.append("</div>")
-        out.append("<h3>치료 방법</h3>" + treat_html())
-        out.append(f"<h3>진료 원칙</h3><p>{E(APPROACH)}</p>")
-        out.append(faq_html(no))
-        out.append(links_html(ALL_COND_LINKS + ["guide"], "질환별 안내"))
-    elif kind == "service":
-        svc = p.get("svc")
-        desc = {n: d for n, _, d in TREATMENTS}
-        txt = {"자율신경치료": desc["통사치료"] + " " + desc["스네피(SNEPI) 자율신경 주사"] + " " + desc["자율신경 검사 (SA-3000)"],
-               "통사치료": desc["통사치료"], "스네피 주사": desc["스네피(SNEPI) 자율신경 주사"],
-               "수액클리닉": desc["영양수액 · 통증케어 수액"] + " 독감·대상포진·파상풍·폐렴구균 예방접종과 SA-3000 자율신경 검사도 합니다.",
-               "내과": desc["내과 진료"]}.get(svc, "")
-        out.append(f'<p class="dbt-seo-eyebrow">{BRAND} · {LOCWORD}</p>')
-        out.append(f"<h2>다산 {E(page_name(no))} 요약</h2><p>{E(txt)}</p>")
-        if svc != "내과":
-            out.append("<h3>이런 통증에 적용합니다</h3>")
-            out.append(links_html(ALL_COND_LINKS, "").replace("<h3></h3>", ""))
-        out.append(faq_html(no))
-    else:  # about / doctor / contact
-        if kind == "doctor":
-            out.append(f"<h2>대표원장 {DOCTOR['name']} 약력</h2>" + ul(DOCTOR["career"]))
-        else:
-            out.append(f"<h2>{BRAND} 한눈에 보기</h2><p>{E(APPROACH)}</p>")
-        out.append("<h3>진료 과목</h3>" + treat_html())
-        out.append(faq_html(no))
-        out.append(links_html(["51", "guide"], "통증 질환 안내"))
-    out.append(clinic_box())
-    return ('<!--dbt-seo:body-start--><section class="dbt-seo" id="dbt-seo" aria-label="진료 안내">'
-            '<div class="dbt-seo-in">' + "".join(out) + "</div></section><!--dbt-seo:body-end-->")
-
-
-LOCWORD = "남양주 다산동"
+    return ('<!--dbt-seo:body-start--><section class="dbt-seo" id="dbt-seo" aria-label="자주 묻는 질문">'
+            + qa_html(no, band=not p.get("has_qa_band")).replace('class="dbt-qa-wrap"', 'class="dbt-qa-wrap dbt-cont"' if p.get("has_qa_band") else 'class="dbt-qa-wrap"', 1)
+            + "</section><!--dbt-seo:body-end-->")
 
 
 # ------------------------------------------------------------------ head
@@ -400,6 +401,32 @@ def alts_for(no):
                 f"{nm} 증상: " + ", ".join(c["symptoms"]),
                 f"{nm} 원인: " + ", ".join(c["causes"])]
     return []
+
+
+SEC_RE = re.compile(r'<div\s+doz_type="section"[^>]*class="section_wrap[^"]*"[^>]*>')
+
+
+def insert_pos(s, no):
+    """원래 페이지의 '오시는 길' 섹션 바로 앞 (본문 마지막) 위치. 28번(오시는 길 페이지)은 사이트 하단 메뉴 섹션 앞."""
+    starts = [m.start() for m in SEC_RE.finditer(s)]
+    if not starts:
+        return None
+    if no == "28":
+        return starts[-1]
+    for k, st in enumerate(starts):
+        end = starts[k + 1] if k + 1 < len(starts) else len(s)
+        txt = re.sub(r"<[^>]+>", "", s[st:end])
+        if "오시는 길" in txt or "오시는길" in txt:
+            # 바로 앞에 붙어 있는 모바일 전용 섹션(오시는 길 지도 등)은 같은 묶음이므로 그 앞에 넣는다
+            while k > 0:
+                prev = s[starts[k - 1]:starts[k]]
+                head = SEC_RE.match(s, starts[k - 1]).group(0)
+                if "mobile_section" in head and not re.sub(r"\s+", "", re.sub(r"<[^>]+>", "", prev.split("dbt-seo:body-start")[0])):
+                    k -= 1
+                else:
+                    break
+            return starts[k]
+    return starts[-1]
 
 
 def process(fname, no):
@@ -483,7 +510,10 @@ def process(fname, no):
     # 텍스트 섹션 (푸터 바로 위)
     sec = section(no)
     if sec:
-        if '<footer id="doz_footer_wrap">' in s:
+        pos = insert_pos(s, no)
+        if pos is not None:
+            s = s[:pos] + sec + s[pos:]
+        elif '<footer id="doz_footer_wrap">' in s:
             s = s.replace('<footer id="doz_footer_wrap">', sec + '<footer id="doz_footer_wrap">', 1)
         else:
             s = s.replace("</body>", sec + "</body>", 1)
@@ -559,9 +589,8 @@ details{{border-bottom:1px solid var(--line);padding:10px 0}}summary{{cursor:poi
 <nav class="toc">{toc}</nav>
 {''.join(blocks)}
 <section class="g-cat"><h2>치료 방법</h2><p>{E(APPROACH)}</p>{treat_html()}</section>
-<section class="g-cat"><h2>자주 묻는 질문</h2>{faq}</section>
 </main>
-{section('guide').replace('<!--dbt-seo:body-start-->','').replace('<!--dbt-seo:body-end-->','') if False else '<section class="dbt-seo"><div class="dbt-seo-in">' + clinic_box() + '</div></section>'}
+<section class="dbt-seo">{qa_html('guide')}<div class="dbt-qa-wrap"><div class="dbt-in">{clinic_box()}</div></div></section>
 <footer style="text-align:center;padding:24px 16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)">
 {BRAND} · 대표 {DOCTOR['name']} · 사업자등록번호 {CLINIC['biz_no']} · {E(CLINIC['address_full'])} · T. {CLINIC['phone']} · F. {CLINIC['fax']}</footer>
 </body>
