@@ -25,6 +25,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from seo_data import (SITE_URL, TODAY, CLINIC, DOCTOR, TREATMENTS, APPROACH, CONDITIONS,  # noqa: E402
                       CATEGORIES, PAGES, PARENT, GLOBAL_FAQ, BRAND)
 
+import hashlib  # noqa: E402
+ASSET_VER = {k: hashlib.md5(open(os.path.join(ROOT, f), "rb").read()).hexdigest()[:8]
+             for k, f in (("css", "css/backup.css"), ("js", "js/backup-runtime.js"))}
 INDEXNOW_KEY = "d4f1b9a2c7e84f0a9b3d6e5c1a2f7b80"
 E = html.escape
 
@@ -451,6 +454,10 @@ def process(fname, no):
     robots = "noindex,follow" if p.get("kind") == "noindex" else None
     s = s.replace("</head>", head_block(no, robots) + "\n</head>", 1)
 
+    # css/js 캐시 무효화 (수정 후 방문자 브라우저에 옛 디자인이 남지 않도록 내용 해시를 붙임)
+    s = re.sub(r'(href=["\'](?:\./|/)?css/backup\.css)(?:\?v=[\w]+)?', r"\g<1>?v=" + ASSET_VER["css"], s)
+    s = re.sub(r'(src=["\'](?:\./|/)?js/backup-runtime\.js)(?:\?v=[\w]+)?', r"\g<1>?v=" + ASSET_VER["js"], s)
+
     # 내부 링크 → 정식 주소
     s = re.sub(r'(href=["\'])(?:\./)?(\d+)\.html(?=["\'#?])', r"\1/\2", s)
     s = re.sub(r'(href=["\'])(?:\./)?index\.html(?=["\'#?])', r"\1/", s)
@@ -567,7 +574,7 @@ def build_guide():
 <title>{E(PAGES['guide']['title'])}</title>
 {head_block('guide')}
 <link rel="icon" href="/assets/cdn.imweb.me/upload/S20251209f5fd7d3e70807/ff0c9deefb90a.png">
-<link rel="stylesheet" href="/css/backup.css">
+<link rel="stylesheet" href="/css/backup.css?v={ASSET_VER['css']}">
 <style>
 :root{{--navy:#12309a;--ink:#222;--muted:#666;--line:#e3e7ef;--bg:#fff;--soft:#f5f7fb}}
 @media (prefers-color-scheme:dark){{:root:not([data-theme="light"]){{--ink:#e8e8e8;--muted:#aaa;--line:#333;--bg:#141619;--soft:#1c1f24;--navy:#8fa8ff}}}}
