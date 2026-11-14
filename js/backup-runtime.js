@@ -21,6 +21,8 @@
   function pageKey() {
     var p = location.pathname.split('/').pop();
     if (!p || p === '') p = 'index.html';
+    // 정식 주소(/66)로 들어와도 66.html 과 같은 페이지로 인식 (팝업 · 수정내용 적용)
+    if (p.indexOf('.') === -1) p += '.html';
     return p;
   }
   var PAGE = pageKey();

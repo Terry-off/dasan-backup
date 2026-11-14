@@ -199,3 +199,21 @@ git push
   삭제하거나 비공개로 바꾸면 배경이 비어 보일 수 있습니다.
 - 관리자 페이지는 주소만 알면 누구나 열 수 있지만, **토큰이 없으면 아무것도 바꿀 수 없습니다.**
   공용 PC 에서 작업했다면 **연결 설정 → 토큰 지우기** 를 눌러 주세요.
+
+---
+
+## 8. 검색 노출 (구글 · 네이버 · ChatGPT · Claude) 최적화
+
+`tools/seo/` 가 모든 페이지에 아래를 자동으로 넣습니다 (`build.sh` 실행 시 자동, 단독 실행은 `python3 tools/seo/inject.py`).
+
+| 항목 | 내용 |
+|---|---|
+| 페이지별 제목·설명 | "다산 오십견 비수술 치료 – 증상·원인 \| 다산바른통의원" 처럼 지역+질환 키워드 |
+| 구조화 데이터 | MedicalClinic · Physician · MedicalCondition · FAQPage · BreadcrumbList (imweb 의 잘못된 '온라인쇼핑몰' 정보 제거) |
+| 본문 텍스트 | 이미지로만 있던 질환 설명(정의·증상·원인·단계)을 각 페이지 하단에 텍스트로 추가 + FAQ + 진료시간 |
+| 이미지 대체텍스트 | 질환 이미지 alt 에 이미지 속 문구 요약 |
+| 새 파일 | `guide.html`(질환 안내 허브, /guide) · `llms.txt` · `llms-full.txt`(AI 용 요약) · IndexNow 키 |
+| robots / sitemap | GPTBot · ClaudeBot · PerplexityBot · Google · Bing · 네이버(Yeti) 명시 허용, 쇼핑 샘플·빈 게시판은 색인 제외 |
+
+**진료시간·전화·주소·질환 설명을 바꿀 때는 `tools/seo/seo_data.py` 만 고치고 다시 실행**하면 모든 페이지·llms.txt 에 반영됩니다.
+(의료광고 심의 기준상 '최고/최초/유일/완치' 같은 표현은 넣지 마세요.)

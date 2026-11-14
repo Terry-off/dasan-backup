@@ -5,7 +5,7 @@ $mime = @{ '.html'='text/html; charset=utf-8'; '.htm'='text/html; charset=utf-8'
   '.cm'='text/css; charset=utf-8'; '.js'='application/javascript; charset=utf-8'; '.mjs'='application/javascript; charset=utf-8';
   '.json'='application/json; charset=utf-8'; '.png'='image/png'; '.jpg'='image/jpeg'; '.jpeg'='image/jpeg'; '.gif'='image/gif';
   '.svg'='image/svg+xml'; '.ico'='image/x-icon'; '.webp'='image/webp'; '.woff'='font/woff'; '.woff2'='font/woff2';
-  '.ttf'='font/ttf'; '.eot'='application/vnd.ms-fontobject'; '.mp4'='video/mp4'; '.xml'='application/xml' }
+  '.ttf'='font/ttf'; '.eot'='application/vnd.ms-fontobject'; '.mp4'='video/mp4'; '.xml'='application/xml'; '.txt'='text/plain; charset=utf-8' }
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:$port/")
 $listener.Start()
@@ -17,6 +17,7 @@ while ($listener.IsListening) {
     if ($rel -eq '') { $rel = 'index.html' }
     $path = Join-Path $root $rel
     if (Test-Path $path -PathType Container) { $path = Join-Path $path 'index.html' }
+    if (-not (Test-Path $path) -and (Test-Path "$path.html")) { $path = "$path.html" }
     if (Test-Path $path -PathType Leaf) {
       $ext = [System.IO.Path]::GetExtension($path).ToLower()
       $ct = $mime[$ext]; if (-not $ct) { $ct = 'application/octet-stream' }

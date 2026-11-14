@@ -119,4 +119,9 @@ TXT
   echo '</urlset>'
 } > sitemap.xml
 
+# SEO · AI 검색 최적화 (title/description/구조화데이터/본문 텍스트/llms.txt/sitemap/robots)
+#  -> tools/seo/seo_data.py 의 내용을 기준으로 다시 주입 (sitemap.xml · robots.txt 도 여기서 덮어씀)
+if command -v python3 >/dev/null 2>&1; then PY=python3; else PY=python; fi
+$PY tools/seo/inject.py
+
 echo "완료: 페이지 $(ls -1 *.html | wc -l) 개, sitemap $(grep -c '<loc>' sitemap.xml) 건"

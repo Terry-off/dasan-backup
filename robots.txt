@@ -1,4 +1,65 @@
+# 다산바른통의원 – 검색엔진 · AI 검색 모두 허용
 User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /shop_view/
+Disallow: /shop_view_1.html
+Disallow: /shop_view_2.html
+
+# AI 검색 / 답변 엔진 (ChatGPT · Claude · Perplexity · Gemini 등) 명시적 허용
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /admin/
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin/
+
+User-agent: Claude-SearchBot
+Allow: /
+Disallow: /admin/
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+Disallow: /admin/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin/
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+
+User-agent: Yeti
+Allow: /
+Disallow: /admin/
+
+User-agent: Daum
+Allow: /
+Disallow: /admin/
+
+User-agent: Applebot
 Allow: /
 Disallow: /admin/
 
