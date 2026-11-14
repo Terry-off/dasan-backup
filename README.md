@@ -1,6 +1,6 @@
 # 다산바른통의원 백업 사이트
 
-원본 홈페이지 <https://dasanbaruntong.imweb.me> 를 **화면 그대로** 복사해 GitHub Pages 에서
+원본 홈페이지(imweb, 현재 만료·폐쇄됨)를 **화면 그대로** 복사해 GitHub Pages 에서
 독립적으로 운영할 수 있게 만든 정적 백업 사이트입니다.
 
 - 전체 **38개 페이지** (메인 + 하위 37개) 미러링
@@ -168,7 +168,12 @@ powershell -ExecutionPolicy Bypass -File tools/serve.ps1
 
 ---
 
-## 6. 원본 홈페이지가 바뀌었을 때 다시 가져오기
+## 6. (사용 중지) 원본 홈페이지에서 다시 가져오기
+
+> **원본 imweb 사이트는 만료되어 더 이상 없습니다.** 아래 `refresh.sh` 는 실행해도 사이트가 망가지므로 막아 두었습니다.
+> 이 저장소가 이제 원본입니다. 내용은 관리자 페이지(/admin/) 또는 `tools/seo/seo_data.py` 로 수정하세요.
+
+<details><summary>예전 방법 (참고용)</summary>
 
 원본 imweb 사이트를 수정한 뒤, 백업 사이트도 최신으로 맞추려면 Git Bash 에서:
 
@@ -184,6 +189,8 @@ git add -A
 git commit -m "원본 사이트 최신 내용 반영"
 git push
 ```
+
+</details>
 
 ---
 

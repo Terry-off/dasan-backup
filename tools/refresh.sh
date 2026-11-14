@@ -9,6 +9,16 @@
 set -e
 cd "$(dirname "$0")/.."
 
+# ------------------------------------------------------------------
+#  [사용 중지] 원본 imweb 사이트(dasanbaruntong.imweb.me)는 만료되어 더 이상 존재하지 않습니다.
+#  이 스크립트를 실행하면 빈 페이지/오류 페이지를 받아와 사이트 전체를 덮어쓰게 되므로 막아 두었습니다.
+#  백업된 원본은 tools/source-pages/ 에 그대로 있고, 내용 수정은
+#   - 관리자 페이지(/admin/)  또는  tools/seo/seo_data.py  로 하세요.
+#  정말로 새 원본에서 다시 받아야 할 때만 아래 줄을 지우고 BASE 주소도 바꾸세요.
+# ------------------------------------------------------------------
+echo "refresh.sh 는 원본 imweb 사이트 만료로 사용 중지되었습니다. (tools/refresh.sh 상단 주석 참고)"
+exit 1
+
 UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 BASE="https://dasanbaruntong.imweb.me"
 PAGES="26 27 28 31 32 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77"
