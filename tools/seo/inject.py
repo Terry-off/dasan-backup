@@ -431,6 +431,25 @@ def insert_pos(s, no):
     return starts[-1]
 
 
+BIG_STYLE = re.compile(r"<style>(@import url\(.*?)</style>", re.S)
+
+
+def externalize_css(s, no):
+    """imweb 이 페이지마다 넣어 둔 600KB 대 인라인 <style> 을 css/page/NN.css 로 분리.
+    (HTML 용량 1MB → 약 0.4MB. 같은 위치의 <link> 라 스타일 적용 순서·결과는 동일)"""
+    m = BIG_STYLE.search(s)
+    if not m or len(m.group(1)) < 100_000:
+        return s
+    css = m.group(1)
+    css = css.replace('url("./assets/', 'url("/assets/').replace("url('./assets/", "url('/assets/") \
+               .replace("url(./assets/", "url(/assets/")
+    os.makedirs(os.path.join(ROOT, "css", "page"), exist_ok=True)
+    name = "index" if no == "index" else no
+    open(os.path.join(ROOT, "css", "page", f"{name}.css"), "w", encoding="utf-8").write(css)
+    ver = hashlib.md5(css.encode()).hexdigest()[:8]
+    return s[:m.start()] + f'<link rel="stylesheet" href="/css/page/{name}.css?v={ver}">' + s[m.end():]
+
+
 def process(fname, no):
     path = os.path.join(ROOT, fname)
     s = open(path, encoding="utf-8").read()
@@ -452,6 +471,8 @@ def process(fname, no):
     s = re.sub(r'(<meta[^>]*property=["\']og:url["\'][^>]*content=["\'])[^"\']*', r"\g<1>" + canon, s, flags=re.I)
     robots = "noindex,follow" if p.get("kind") == "noindex" else None
     s = s.replace("</head>", head_block(no, robots) + "\n</head>", 1)
+
+    s = externalize_css(s, no)
 
     # css/js 캐시 무효화 (수정 후 방문자 브라우저에 옛 디자인이 남지 않도록 내용 해시를 붙임)
     s = re.sub(r'(href=["\'](?:\./|/)?css/backup\.css)(?:\?v=[\w]+)?', r"\g<1>?v=" + ASSET_VER["css"], s)
