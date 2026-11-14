@@ -23,7 +23,8 @@ import sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from seo_data import (SITE_URL, TODAY, CLINIC, DOCTOR, TREATMENTS, APPROACH, CONDITIONS,  # noqa: E402
-                      CATEGORIES, PAGES, PARENT, GLOBAL_FAQ, BRAND)
+                      CATEGORIES, PAGES, PARENT, GLOBAL_FAQ, BRAND,
+                      SYMPTOM_GROUPS, DIRECTIONS, KNEE_HIP_PART, KNEE_HIP_DURATION, KNEE_HIP_SITUATION)
 
 import hashlib  # noqa: E402
 ASSET_VER = {k: hashlib.md5(open(os.path.join(ROOT, f), "rb").read()).hexdigest()[:8]
@@ -128,7 +129,7 @@ def doctor_node():
         "name": DOCTOR["name"],
         "jobTitle": f"{BRAND} {DOCTOR['title']}",
         "description": " / ".join(DOCTOR["career"]),
-        "medicalSpecialty": ["https://schema.org/Emergency", "https://schema.org/Musculoskeletal"],
+        "medicalSpecialty": ["https://schema.org/Musculoskeletal"],
         "alumniOf": [{"@type": "CollegeOrUniversity", "name": "충남대학교 의과대학"},
                      {"@type": "Hospital", "name": "경희의료원"}],
         "memberOf": [{"@type": "Organization", "name": n} for n in
@@ -240,6 +241,44 @@ def hours_qa():
             P(f"{HOURS_TXT}. 위치: {CLINIC['address_full']} (건물 내 주차). 전화 {CLINIC['phone']}."))
 
 
+def clinks(nos):
+    return ", ".join(f'<a href="{href(x)}">{E(page_name(x))}</a>' for x in nos)
+
+
+def symptom_qa():
+    lis = "".join(f'<li><b>{E(g["key"])}</b> – {E(g["text"])}'
+                  + (f' 관련 진료: {clinks(g["conds"])}.' if g["conds"] else "") + "</li>" for g in SYMPTOM_GROUPS)
+    return ("어떤 증상 때문에 찾으시나요? (허리·목, 어깨·팔, 무릎·고관절, 손목·발목, 골절·스포츠 손상, 만성 근육·관절 통증)",
+            P(f"{BRAND}은 아래 증상으로 많이 찾아오십니다. 증상에 따라 확인하는 질환이 다릅니다.") + f"<ul>{lis}</ul>")
+
+
+def direction_qa():
+    lis = "".join(f"<li><b>{E(k)}</b> – {E(v)}</li>" for k, v in DIRECTIONS)
+    return ("원하는 진료 방향별로 어떻게 진료하나요? (비수술 치료 · 정확한 진단과 검사 · 주사·재활 · 수술이 필요한 경우 · 가까운 곳에서 빠른 진료)",
+            f"<ul>{lis}</ul>")
+
+
+def group_qas(g):
+    out = [(f"{g['key']}은 어떤 병원에서 진료받나요? (다산동)",
+            P(g["text"]) + (f"<p>관련 진료: {clinks(g['conds'])}.</p>" if g["conds"] else "") +
+            P(f"{BRAND}(남양주 다산지금로 130 하나로프라자II 2층, 031-522-6563)에서 비수술 방법으로 진료합니다."))]
+    return out
+
+
+def knee_hip_qas():
+    part = "".join(f"<li><b>{E(a)}</b> – {E(b)}" + (f" ({clinks(c)})" if c else "") + "</li>" for a, b, c in KNEE_HIP_PART)
+    dur = "".join(f"<li><b>{E(a)}</b> – {E(b)}</li>" for a, b in KNEE_HIP_DURATION)
+    sit = "".join(f"<li><b>{E(a)}</b> – {E(b)}</li>" for a, b in KNEE_HIP_SITUATION)
+    return [
+        ("무릎·고관절 통증, 가장 아픈 부위에 따라 어떻게 다른가요? (무릎 · 고관절 · 사타구니 · 엉덩이~허벅지)",
+         f"<ul>{part}</ul>"),
+        ("무릎·고관절 통증이 얼마나 지속됐는지에 따라 달라지나요? (1~2주 · 1~3개월 · 3개월 이상 · 1년 이상)",
+         f"<ul>{dur}</ul>"),
+        ("어떤 상황에서 아픈지에 따라 원인이 다른가요? (걷거나 계단 · 앉았다 일어날 때 · 가만히 있어도 · 아침 뻣뻣함 · 오래 걸으면)",
+         f"<ul>{sit}</ul>"),
+    ]
+
+
 def qa_items(no):
     """(질문, 답변 HTML) 목록 — 화면의 Q&A 와 FAQPage 구조화데이터가 같은 내용을 쓴다."""
     items = []
@@ -256,6 +295,8 @@ def qa_items(no):
         if c.get("types"):
             items.append(("신경통에는 어떤 종류가 있나요? (좌골신경통·삼차신경통·늑간신경통)",
                           "<ul>" + "".join(f"<li><b>{E(x)}</b> – {E(y)}</li>" for x, y in c["types"]) + "</ul>"))
+        if no in ("67", "68"):
+            items += knee_hip_qas()
         items.append(where_qa(nm))
         items.append((f"{BRAND}에서는 {j(nm, '을', '를')} 어떻게 치료하나요?", P(APPROACH) + treat_html()))
         items.append((f"{j(nm, '은', '는')} 꼭 수술해야 하나요? 비수술 치료가 가능한가요?",
@@ -281,6 +322,17 @@ def qa_items(no):
             else:
                 items.append((f"{CATEGORIES[ch]['name']} 진료 안내",
                               P(CATEGORIES[ch]["intro"]) + f'<p><a href="{href(ch)}">자세히 보기</a></p>'))
+        for g in SYMPTOM_GROUPS:
+            if g["cat"] == no:
+                items += group_qas(g)
+        if no == "55":
+            items += knee_hip_qas()
+        if no == "53":
+            items.append(("엉덩이·고관절·사타구니가 아픈데 허리 문제일 수 있나요?",
+                          P(KNEE_HIP_PART[1][1]) + P(KNEE_HIP_PART[3][1]) + f"<p>관련 진료: {clinks(['74', '62', '61'])}.</p>"))
+        if no == "51":
+            items.append(symptom_qa())
+            items.append(direction_qa())
         items.append(where_qa(cat["name"]))
         items.append((f"{BRAND}의 {cat['name']} 치료 방법은?", P(APPROACH) + treat_html()))
         items.append(hours_qa())
@@ -294,6 +346,12 @@ def qa_items(no):
             ", ".join(f'<a href="{href(x)}">{E(CONDITIONS[x]["name"])}</a>' for x in CATEGORIES[c]["children"]) + "</li>"
             for c in ["52", "53", "54", "55", "56", "57", "58"])
         items.append(("어떤 통증 질환을 진료하나요? (목·허리·어깨·무릎·손목·발목)", f"<ul>{parts}</ul>"))
+        items.append(symptom_qa())
+        items.append(direction_qa())
+        if no == "guide":
+            for g in SYMPTOM_GROUPS:
+                items += group_qas(g)
+        items += knee_hip_qas()
         items.append(("치료 방법은 무엇인가요? (통사치료 · 스네피 주사 · 수액)", P(APPROACH) + treat_html()))
         items.append((f"대표원장은 누구인가요?",
                       P(f"대표원장 {DOCTOR['name']}입니다.") + ul(DOCTOR["career"])))
@@ -569,7 +627,7 @@ def process_noindex(fname, title):
 def build_guide():
     PAGES["guide"] = dict(
         title=f"다산 통증 질환 안내 – 목 · 허리 · 어깨 · 무릎 · 손목 · 발목 | {BRAND} (남양주 다산동)",
-        desc=f"남양주 다산동 {BRAND}에서 진료하는 통증 질환 16가지(목디스크, 허리디스크, 척추관 협착증, 오십견, 회전근개 파열, "
+        desc=f"다산 정형외과 질환 통증(허리·목, 어깨·팔, 무릎·고관절, 손목·발목, 스포츠 손상, 만성 통증) 비수술 치료 – 남양주 다산동 {BRAND}에서 진료하는 통증 질환 16가지(목디스크, 허리디스크, 척추관 협착증, 오십견, 회전근개 파열, "
              "무릎 관절염, 손목터널 증후군, 족저근막염, 신경통 등)의 증상·원인·비수술 치료를 한 페이지에 정리했습니다.",
         h1=f"다산 통증 질환 안내 – {BRAND}", kind="category")
     PARENT["guide"] = None
@@ -618,7 +676,7 @@ details{{border-bottom:1px solid var(--line);padding:10px 0}}summary{{cursor:poi
 {''.join(blocks)}
 <section class="g-cat"><h2>치료 방법</h2><p>{E(APPROACH)}</p>{treat_html()}</section>
 </main>
-<section class="dbt-seo">{qa_html('guide')}<div class="dbt-in" style="padding-bottom:60px">{clinic_box()}</div></section>
+<section class="dbt-seo">{qa_html('guide').replace('<details class="dbt-fold">', '<details class="dbt-fold" open>', 1)}<div class="dbt-in" style="padding-bottom:60px">{clinic_box()}</div></section>
 <footer style="text-align:center;padding:24px 16px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)">
 {BRAND} · 대표 {DOCTOR['name']} · 사업자등록번호 {CLINIC['biz_no']} · {E(CLINIC['address_full'])} · T. {CLINIC['phone']} · F. {CLINIC['fax']}</footer>
 </body>
@@ -635,6 +693,13 @@ def build_llms():
     cats = "\n".join(f"- [{v['name']}]({url(k)}): {v['intro']}" for k, v in CATEGORIES.items())
     treats = "\n".join(f"- [{n}]({url(p)}): {d}" for n, p, d in TREATMENTS)
     faq = "\n\n".join(f"Q. {q}\nA. {a}" for q, a in GLOBAL_FAQ)
+    strip = lambda t: re.sub(r"<[^>]+>", "", t)
+    symptoms = "\n".join(f"- {g['key']}: {g['text']} 관련 페이지: " + ", ".join(f"{page_name(x)}({url(x)})" for x in g["conds"])
+                         for g in SYMPTOM_GROUPS)
+    directions = "\n".join(f"- {k}: {v}" for k, v in DIRECTIONS)
+    kh = ("부위별:\n" + "\n".join(f"- {a}: {b}" for a, b, _ in KNEE_HIP_PART) +
+          "\n기간별:\n" + "\n".join(f"- {a}: {b}" for a, b in KNEE_HIP_DURATION) +
+          "\n상황별:\n" + "\n".join(f"- {a}: {b}" for a, b in KNEE_HIP_SITUATION))
     short = f"""# {BRAND} (Dasan Barun Tong Clinic)
 
 > 경기도 남양주시 다산동(다산신도시)에 있는 통증·내과 의원. 목디스크·허리디스크·척추관 협착증·오십견·회전근개 파열·석회화건염·무릎 퇴행성 관절염·반월판연골 손상·손목터널 증후군·테니스/골프 엘보·발목 염좌·족저근막염·아킬레스건염·신경통 등 근골격계(정형외과 영역) 통증을 통사치료와 스네피(SNEPI) 자율신경 주사 등 비수술 방법으로 치료하고, 내과·영양수액·예방접종을 진료합니다.
@@ -658,6 +723,15 @@ def build_llms():
 - "남양주 다산 목디스크·허리디스크·오십견 비수술 치료"
 - "다산동 화요일 야간진료 · 토요일 진료 의원", "다산 내과", "다산 수액"
 - 참고: {BRAND}은 정형외과 간판의 의원은 아니며, 정형외과 질환의 통증을 비수술로 진료하는 통증·내과 의원입니다.
+
+## 어떤 증상으로 찾아오나요? (증상별 안내)
+{symptoms}
+
+## 원하는 진료 방향별 안내
+{directions}
+
+## 무릎·고관절 통증 (부위 / 기간 / 상황별)
+{kh}
 
 ## 치료
 {treats}
