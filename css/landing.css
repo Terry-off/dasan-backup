@@ -132,3 +132,19 @@ img { max-width: 100%; height: auto; }
   .lp-ft-tel { font-size: 19px; }
 }
 .nq-sim { font-size: 15px; color: #888787; line-height: 1.7; margin-top: 6px !important; }
+
+/* 믿고 찾는 이유 (원본 사이트의 01~04 번호 박스 형태) */
+.lp-one { font-size: 20px; font-weight: 700; color: #222; margin-bottom: 20px !important; }
+.lp-why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.lp-why-box { position: relative; border: 3px solid #eee; background: #fff; padding: 26px 24px 22px; }
+.lp-why-no { position: absolute; top: 14px; right: 18px; font-size: 34px; font-weight: 700; color: #e6e6e6; line-height: 1; }
+.lp-why-box h3 { margin: 0 0 10px !important; font-size: 19px !important; color: #222; padding-right: 44px; }
+.lp-why-box p { margin: 0; font-size: 16px; line-height: 1.75; }
+@media (max-width: 991px) { .lp-why { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 767px) {
+  .lp-one { font-size: 17px; }
+  .lp-why { grid-template-columns: 1fr; }
+  .lp-why-box { padding: 20px 18px 18px; }
+  .lp-why-box h3 { font-size: 17px !important; }
+  .lp-why-box p { font-size: 15px; }
+}

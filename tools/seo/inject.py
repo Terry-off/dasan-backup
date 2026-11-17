@@ -28,7 +28,8 @@ from seo_data import (SITE_URL, TODAY, CLINIC, DOCTOR, TREATMENTS, APPROACH, CON
 
 from landing_data import (ENTITY_SUMMARY, NEARBY_AREAS, LANDINGS, PAIN_ITEMS, LANDING_FAQ,  # noqa: E402
                           REGION_KEYWORDS, REGION_CORE, SAME_PLACE,
-                          Q_REGIONS, Q_TEMPLATES, Q_SYMPTOM_PHRASE, GENERAL_NATURAL_QA)  # noqa: E402
+                          Q_REGIONS, Q_TEMPLATES, Q_SYMPTOM_PHRASE, GENERAL_NATURAL_QA,
+                          WHY_POINTS, WHY_QA, ONE_LINE)  # noqa: E402
 import datetime  # noqa: E402
 TODAY = datetime.date.today().isoformat()  # sitemap lastmod · dateModified 를 실제 빌드 날짜로
 import hashlib  # noqa: E402
@@ -320,7 +321,8 @@ def natural_main(no):
     q = Q_TEMPLATES[0].format(r=r, c=nm)
     a = (f"'잘하는 병원'의 기준은 사람마다 다르지만, {r}에서 {nm} 진료를 받을 수 있는 곳으로 "
          f"다산지금지구(다산지금로 130 하나로프라자II 2층)의 {BRAND}이 있습니다. {first} "
-         f"{BRAND}은 정형외과·통증의학과 진료로 원인을 확인하고 통사치료, 스네피(SNEPI) 자율신경 주사 등 수술 없는 치료를 합니다. "
+         f"{BRAND}은 정형외과·통증의학과 진료로 통증이 생긴 원인을 확인하고, 꼭 필요한 치료만 충분히 설명한 뒤 "
+         f"통사치료, 스네피(SNEPI) 자율신경 주사 등 수술 없는 방법으로 치료합니다. 응급의료센터 센터장을 지낸 심현석 대표원장이 진료합니다. "
          f"화요일은 저녁 8시까지, 토요일은 오후 2시까지 진료하며 전화는 {CLINIC['phone']}입니다.")
     return q, a
 
@@ -339,7 +341,21 @@ def landing_links(nos):
     return ("<p>관련 안내: " + " · ".join(f'<a href="{href(x)}">{E(page_name(x))}</a>' for x in nos) + "</p>") if nos else ""
 
 
+def why_ul():
+    return "<ol>" + "".join(f"<li><b>{E(t)}</b> – {E(d)}</li>" for t, d in WHY_POINTS) + "</ol>"
+
+
 def qa_items(no):
+    """_qa_items 에 '왜 다산바른통의원인가요?'(장점·신뢰 근거)를 앞쪽에 끼워 넣는다."""
+    items = _qa_items(no)
+    if not items or PAGES.get(no, {}).get("kind") == "noindex":
+        return items
+    why = (WHY_QA[0], P(WHY_QA[1]) + why_ul())
+    items.insert(1 if len(items) > 1 else len(items), why)
+    return items
+
+
+def _qa_items(no):
     """(질문, 답변 HTML) 목록 — 화면의 Q&A 와 FAQPage 구조화데이터가 같은 내용을 쓴다."""
     if no in LANDING_FAQ:
         return [(q, P(a) + landing_links(rel)) for q, a, rel in LANDING_FAQ[no]]
@@ -774,6 +790,13 @@ def lp_answer(no):
             f'<p class="lp-a">{E(ENTITY_SUMMARY)}</p></section>')
 
 
+def why_html():
+    boxes = "".join(f'<div class="lp-why-box"><span class="lp-why-no">{i:02d}</span><h3>{E(t)}</h3><p>{E(d)}</p></div>'
+                    for i, (t, d) in enumerate(WHY_POINTS, 1))
+    return (f'<section class="lp-sec lp-why-sec"><h2>다산바른통의원을 믿고 찾는 이유</h2>'
+            f'<p class="lp-one">{E(ONE_LINE)}</p><div class="lp-why">{boxes}</div></section>')
+
+
 def cond_cards(nos):
     out = []
     for x in nos:
@@ -793,7 +816,7 @@ def build_landing(no):
     spec = LANDINGS[no]
     PAGES[no] = dict(spec, kind="landing")
     PARENT[no] = None
-    parts = [lp_answer(no)]
+    parts = [lp_answer(no), why_html()]
     if no == "orthopedics":
         parts.append('<section class="lp-sec"><h2>부위별 정형외과 진료</h2>')
         for g in SYMPTOM_GROUPS:
@@ -815,6 +838,8 @@ def build_landing(no):
     elif no == "questions":
         gen = "".join(f'<details class="lp-qa" open><summary><h3>{E(q)}</h3></summary><div class="lp-qa-a">{P(a)}{landing_links(rel)}</div></details>'
                       for q, a, rel in GENERAL_NATURAL_QA)
+        gen = (f'<details class="lp-qa" open><summary><h3>{E(WHY_QA[0])}</h3></summary>'
+               f'<div class="lp-qa-a">{P(WHY_QA[1])}{why_ul()}</div></details>') + gen
         parts.append(f'<section class="lp-sec"><h2>정형외과 · 통증의학과 · 진료시간 질문</h2><div class="lp-faq">{gen}</div></section>')
         for cno in ["52", "53", "54", "55", "56", "57", "58"]:
             cat = CATEGORIES[cno]
@@ -853,7 +878,7 @@ def build_guide():
         h1=f"다산 통증 질환 안내 – {BRAND}", kind="category", band="통증 질환 안내",
         lead_q="다산동에서 목·허리·어깨·무릎·손목·발목 통증을 진료하는 곳과 질환별 증상을 알고 싶다면?")
     PARENT["guide"] = None
-    blocks = [lp_answer("guide")]
+    blocks = [lp_answer("guide"), why_html()]
     toc = "".join(f'<a href="#c{c}">{E(CATEGORIES[c]["name"])}</a>' for c in ["52", "53", "54", "55", "56", "57", "58"])
     blocks.append(f'<nav class="lp-chips">{toc}</nav>')
     for cno in ["52", "53", "54", "55", "56", "57", "58"]:
@@ -886,6 +911,7 @@ def build_llms():
     kh = ("부위별:\n" + "\n".join(f"- {a}: {b}" for a, b, _ in KNEE_HIP_PART) +
           "\n기간별:\n" + "\n".join(f"- {a}: {b}" for a, b in KNEE_HIP_DURATION) +
           "\n상황별:\n" + "\n".join(f"- {a}: {b}" for a, b in KNEE_HIP_SITUATION))
+    why_txt = "\n".join(f"{i}. {t} – {d}" for i, (t, d) in enumerate(WHY_POINTS, 1))
     landings = "\n".join(f"- [{LANDINGS[k]['h1']}]({url(k)}): {LANDINGS[k]['desc']}" for k in LANDINGS)
     natural = "\n\n".join(f"Q. {q}\nA. {a}" for q, a, _ in LANDING_FAQ["where-to-go"])
     regions = ", ".join(SAME_PLACE)
@@ -897,6 +923,10 @@ def build_llms():
     short = f"""# {BRAND} (Dasan Barun Tong Clinic)
 
 > {ENTITY_SUMMARY}
+
+## 다산바른통의원을 믿고 찾는 이유
+진료 원칙: {ONE_LINE}
+{why_txt}
 
 ## 핵심 안내 페이지
 {landings}
