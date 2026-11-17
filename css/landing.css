@@ -148,3 +148,10 @@ img { max-width: 100%; height: auto; }
   .lp-why-box h3 { font-size: 17px !important; }
   .lp-why-box p { font-size: 15px; }
 }
+
+/* 질환 × 진료과 표 */
+.lp-table { width: 100%; border-collapse: collapse; font-size: 16px; margin-top: 10px; }
+.lp-table th, .lp-table td { border-top: 1px solid var(--lp-line); padding: 10px 12px; text-align: left; vertical-align: top; }
+.lp-table thead th { border-top: 2px solid #363636; background: var(--lp-soft); font-weight: 700; }
+.lp-table tbody tr:last-child td { border-bottom: 1px solid #363636; }
+@media (max-width: 767px) { .lp-table { font-size: 14px; } .lp-table th, .lp-table td { padding: 8px 6px; } }

@@ -29,7 +29,7 @@ from seo_data import (SITE_URL, TODAY, CLINIC, DOCTOR, TREATMENTS, APPROACH, CON
 from landing_data import (ENTITY_SUMMARY, NEARBY_AREAS, LANDINGS, PAIN_ITEMS, LANDING_FAQ,  # noqa: E402
                           REGION_KEYWORDS, REGION_CORE, SAME_PLACE,
                           Q_REGIONS, Q_TEMPLATES, Q_SYMPTOM_PHRASE, GENERAL_NATURAL_QA,
-                          WHY_POINTS, WHY_QA, ONE_LINE)  # noqa: E402
+                          WHY_POINTS, WHY_QA, ONE_LINE, DEPTS, DEPT_INFO, COND_DEPTS)  # noqa: E402
 import datetime  # noqa: E402
 TODAY = datetime.date.today().isoformat()  # sitemap lastmod · dateModified 를 실제 빌드 날짜로
 import hashlib  # noqa: E402
@@ -73,7 +73,7 @@ def page_name(no):
             "32": "자율신경치료", "49": "통사치료", "50": "스네피(SNEPI) 주사", "75": "수액클리닉",
             "77": "게시판", "guide": "통증 질환 안내", "orthopedics": "정형외과 진료",
             "pain-clinic": "통증의학과 진료", "where-to-go": "증상별 병원 안내", "area": "위치·인근 지역",
-            "questions": "질문 모음"}.get(no, no)
+            "questions": "질문 모음", "departments": "진료과 안내"}.get(no, no)
 
 
 def crumbs(no):
@@ -119,12 +119,13 @@ def clinic_node():
         "availableService": [
             {"@type": "MedicalTherapy", "name": n, "description": d, "url": url(p)} for n, p, d in TREATMENTS],
         "knowsAbout": [v["name"] for v in CONDITIONS.values()] +
-                      ["정형외과 진료", "통증의학과 진료", "목 통증", "허리 통증", "어깨 통증", "무릎 통증", "고관절 통증",
+                      ["정형외과 진료", "통증의학과 진료", "마취통증의학과 진료 영역 통증", "재활의학과 진료 영역 기능 회복",
+                       "신경외과 진료 영역 척추 질환(비수술)", "척추 질환", "목 통증", "허리 통증", "어깨 통증", "무릎 통증", "고관절 통증",
                        "손목 통증", "발목 통증", "골반 통증", "골절", "스포츠 손상", "근막통증증후군", "손발 저림",
                        "대상포진 후 신경통", "비수술 통증치료", "자율신경 치료", "만성 통증", "고혈압", "당뇨"],
         "employee": {"@id": SITE_URL + "/#doctor"},
         "founder": {"@id": SITE_URL + "/#doctor"},
-        "keywords": ", ".join(f"{r} {d}" for r in REGION_KEYWORDS for d in ("정형외과", "통증의학과")) + ", 남양주 정형외과, 남양주 통증의학과, 다산 통증의원, "
+        "keywords": ", ".join(f"{r} {d}" for r in REGION_KEYWORDS for d in DEPTS) + ", 남양주 정형외과, 남양주 통증의학과, 다산 통증의원, "
                     "다산 목디스크, 다산 허리디스크, 다산 오십견, 다산 어깨통증, 다산 무릎통증, 다산 내과",
     }
 
@@ -308,7 +309,23 @@ def natural_variants(no):
     out.append(f"{Q_REGIONS[(i + 3) % len(Q_REGIONS)]} {alt} 병원 어디가 좋아?")
     if no in Q_SYMPTOM_PHRASE:
         out.append(f"{Q_SYMPTOM_PHRASE[no]} {Q_REGIONS[(i + 5) % len(Q_REGIONS)]} 어디 가야 돼?")
+    ds = COND_DEPTS.get(no, [])
+    if len(ds) >= 2:
+        out.append(f"{Q_REGIONS[(i + 6) % len(Q_REGIONS)]} {c} {ds[0]}랑 {ds[1]} 중에 어디 가야 돼?")
+    if ds:
+        out.append(f"{Q_REGIONS[(i + 7) % len(Q_REGIONS)]} {c} {ds[-1]} 추천해줘")
     return out
+
+
+def dept_qa(no):
+    """질환별 '어느 과로 가야 하나요?' 질문 (진료과 이름 검색 대응)."""
+    nm = short_name(no)
+    ds = COND_DEPTS.get(no, [])
+    q = f"{j(nm, '은', '는')} 어느 과로 가야 하나요? ({' · '.join(ds)})"
+    a = (f"{j(nm, '은', '는')} {', '.join(ds)}에서 함께 보는 질환입니다. 다산신도시 다산지금지구의 {BRAND}은 정형외과·통증의학과 진료로 "
+         f"{j(nm, '을', '를')} 수술 없이 치료하므로, 어느 과로 가야 할지 고민될 때 한 곳에서 진찰받으실 수 있습니다. "
+         "수술이 필요한 소견이면 적합한 상급 의료기관으로 안내합니다.")
+    return q, a
 
 
 def natural_main(no):
@@ -377,6 +394,8 @@ def _qa_items(no):
             items += knee_hip_qas()
         nq, na = natural_main(no)
         items.append((nq, P(na) + variants_html(no)))
+        dq, da = dept_qa(no)
+        items.append((dq, P(da) + '<p>관련 안내: <a href="/departments">진료과 안내</a></p>'))
         items.append((f"{BRAND}에서는 {j(nm, '을', '를')} 어떻게 치료하나요?", P(APPROACH) + treat_html()))
         items.append((f"{j(nm, '은', '는')} 꼭 수술해야 하나요? 비수술 치료가 가능한가요?",
                       P(f"증상과 진행 정도에 따라 다릅니다. 비수술 치료로 호전을 기대할 수 있는 경우가 있어 {BRAND}에서는 "
@@ -482,7 +501,7 @@ def qa_html(no):
         rel = [x for x in CATEGORIES[PARENT[no]]["children"] if x != no] + [PARENT[no]]
     elif no in CATEGORIES:
         rel = list(CATEGORIES[no]["children"])
-    rel += [x for x in ("orthopedics", "pain-clinic", "where-to-go", "questions", "guide") if x != no]
+    rel += [x for x in ("orthopedics", "pain-clinic", "departments", "where-to-go", "questions", "guide") if x != no]
     chips = "".join(f'<a href="{href(n)}">{E(page_name(n))}</a>' for n in rel)
     # 한 줄 버튼(접힘) → 누르면 Q&A 목록이 펼쳐짐. 내용은 HTML 에 그대로 있어 검색엔진·AI 는 모두 읽음
     return (f'<div class="dbt-in"><details class="dbt-fold"><summary><h2>{label}</h2></summary>'
@@ -509,10 +528,11 @@ def head_block(no, robots=None):
         name if no != "index" else None,
         "다산바른통의원", "다산 정형외과", "다산동 정형외과", "다산지금지구 정형외과", "다산 통증의학과", "다산동 통증의학과",
         "남양주 정형외과", "남양주 통증의학과", "다산 통증의원", "도농동 정형외과"])))
-    keywords += ", " + ", ".join(f"{r} {d}" for r in REGION_CORE for d in ("정형외과", "통증의학과"))
+    keywords += ", " + ", ".join(f"{r} {d}" for r in REGION_CORE for d in DEPTS)
     if no in CONDITIONS:
         keywords += ", " + ", ".join(CONDITIONS[no]["alt"]) + ", " + ", ".join(
-            f"{r} {CONDITIONS[no]['name']}" for r in ("다산동", "지금동", "다산신도시"))
+            f"{r} {CONDITIONS[no]['name']}" for r in ("다산동", "지금동", "다산신도시")) + ", " + ", ".join(
+            f"{CONDITIONS[no]['name']} {d}" for d in COND_DEPTS.get(no, []))
     lines = [
         "<!--dbt-seo:head-start-->",
         f'<meta name="description" content="{E(p["desc"])}">',
@@ -746,7 +766,7 @@ def lp_shell(no, body):
     crumb = " › ".join(f'<a href="{href(n)}">{E("홈" if n == "index" else page_name(n))}</a>' for n in cr[:-1]) + \
         f' › <span>{E(page_name(no))}</span>'
     hub = "".join(f'<a href="{href(n)}">{E(page_name(n))}</a>'
-                  for n in ("orthopedics", "pain-clinic", "where-to-go", "questions", "area", "guide") if n != no)
+                  for n in ("orthopedics", "pain-clinic", "departments", "where-to-go", "questions", "area", "guide") if n != no)
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -835,6 +855,16 @@ def build_landing(no):
     elif no == "where-to-go":
         idx = "".join(f'<li><a href="#q{i}">{E(q)}</a></li>' for i, (q, _, _) in enumerate(LANDING_FAQ[no]))
         parts.append(f'<section class="lp-sec"><h2>증상 바로가기</h2><ol class="lp-toc">{idx}</ol></section>')
+    elif no == "departments":
+        parts.append('<section class="lp-sec"><h2>진료과별로 보는 질환과 다산바른통의원의 진료</h2>')
+        for name, what, ours, rel in DEPT_INFO:
+            parts.append(f'<h3>{E(name)}</h3><p>{E(what)}</p><p><b>{E(ours)}</b></p>{cond_cards(rel)}')
+        parts.append('</section>')
+        rows = "".join(f'<tr><td><a href="{href(n)}">{E(CONDITIONS[n]["name"])}</a></td><td>{E(" · ".join(COND_DEPTS[n]))}</td></tr>'
+                       for n in COND_ORDER)
+        parts.append(f'<section class="lp-sec"><h2>질환별로 함께 찾는 진료과</h2>'
+                     f'<p>아래 질환은 여러 진료과에서 함께 봅니다. {BRAND}은 이 질환들을 정형외과·통증의학과 진료로 수술 없이 치료합니다.</p>'
+                     f'<table class="lp-table"><thead><tr><th>질환</th><th>함께 찾는 진료과</th></tr></thead><tbody>{rows}</tbody></table></section>')
     elif no == "questions":
         gen = "".join(f'<details class="lp-qa" open><summary><h3>{E(q)}</h3></summary><div class="lp-qa-a">{P(a)}{landing_links(rel)}</div></details>'
                       for q, a, rel in GENERAL_NATURAL_QA)
@@ -911,6 +941,8 @@ def build_llms():
     kh = ("부위별:\n" + "\n".join(f"- {a}: {b}" for a, b, _ in KNEE_HIP_PART) +
           "\n기간별:\n" + "\n".join(f"- {a}: {b}" for a, b in KNEE_HIP_DURATION) +
           "\n상황별:\n" + "\n".join(f"- {a}: {b}" for a, b in KNEE_HIP_SITUATION))
+    depts_txt = "\n".join(f"- {n}: {w} → {o} ({url(r[0])})" for n, w, o, r in DEPT_INFO)
+    cond_depts_txt = "\n".join(f"- {CONDITIONS[n]['name']}: {' · '.join(COND_DEPTS[n])}" for n in COND_ORDER)
     why_txt = "\n".join(f"{i}. {t} – {d}" for i, (t, d) in enumerate(WHY_POINTS, 1))
     landings = "\n".join(f"- [{LANDINGS[k]['h1']}]({url(k)}): {LANDINGS[k]['desc']}" for k in LANDINGS)
     natural = "\n\n".join(f"Q. {q}\nA. {a}" for q, a, _ in LANDING_FAQ["where-to-go"])
@@ -930,6 +962,11 @@ def build_llms():
 
 ## 핵심 안내 페이지
 {landings}
+
+## 진료과로 찾는 경우 (정형외과 · 마취통증의학과/통증의학과 · 재활의학과 · 신경외과)
+{depts_txt}
+질환별로 함께 찾는 진료과:
+{cond_depts_txt}
 
 ## 지역 이름
 같은 병원 위치를 가리키는 지역 표현: {regions}. 다산지금지구는 다산신도시(다산지구) 안에 있고 다산동·지금동 일대로 불립니다. 인근 지역: 도농동, 다산진건지구, 가운동, 수석동, 구리, 별내, 퇴계원, 와부(덕소).
@@ -1089,6 +1126,12 @@ Sitemap: {SITE_URL}/sitemap.xml
 
 
 def main():
+    for n in CONDITIONS:
+        ds = COND_DEPTS.get(n, [])
+        nm = CONDITIONS[n]["name"]
+        PAGES[n]["desc"] = (f"남양주 다산동 다산지금지구 {nm}({', '.join(CONDITIONS[n]['alt'][:2])}) – "
+                            f"{'·'.join(ds)}에서 보는 {j(nm, '을', '를')} 정형외과·통증의학과로 수술 없이 진료하는 {BRAND}. "
+                            + CONDITIONS[n]["summary"][:60].rstrip() + "…")
     files = {"index": "index.html"}
     for n in PAGES:
         if n.isdigit():
