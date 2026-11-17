@@ -131,3 +131,4 @@ img { max-width: 100%; height: auto; }
   .lp-clinic { grid-template-columns: 1fr; padding: 22px 18px; gap: 18px; }
   .lp-ft-tel { font-size: 19px; }
 }
+.nq-sim { font-size: 15px; color: #888787; line-height: 1.7; margin-top: 6px !important; }

@@ -27,7 +27,8 @@ from seo_data import (SITE_URL, TODAY, CLINIC, DOCTOR, TREATMENTS, APPROACH, CON
                       SYMPTOM_GROUPS, DIRECTIONS, KNEE_HIP_PART, KNEE_HIP_DURATION, KNEE_HIP_SITUATION)
 
 from landing_data import (ENTITY_SUMMARY, NEARBY_AREAS, LANDINGS, PAIN_ITEMS, LANDING_FAQ,  # noqa: E402
-                          REGION_KEYWORDS, REGION_CORE, SAME_PLACE)  # noqa: E402
+                          REGION_KEYWORDS, REGION_CORE, SAME_PLACE,
+                          Q_REGIONS, Q_TEMPLATES, Q_SYMPTOM_PHRASE, GENERAL_NATURAL_QA)  # noqa: E402
 import datetime  # noqa: E402
 TODAY = datetime.date.today().isoformat()  # sitemap lastmod · dateModified 를 실제 빌드 날짜로
 import hashlib  # noqa: E402
@@ -70,7 +71,8 @@ def page_name(no):
     return {"26": "병원소개", "76": "인사말", "27": "의료진", "28": "오시는 길·진료시간", "31": "내과진료",
             "32": "자율신경치료", "49": "통사치료", "50": "스네피(SNEPI) 주사", "75": "수액클리닉",
             "77": "게시판", "guide": "통증 질환 안내", "orthopedics": "정형외과 진료",
-            "pain-clinic": "통증의학과 진료", "where-to-go": "증상별 병원 안내", "area": "위치·인근 지역"}.get(no, no)
+            "pain-clinic": "통증의학과 진료", "where-to-go": "증상별 병원 안내", "area": "위치·인근 지역",
+            "questions": "질문 모음"}.get(no, no)
 
 
 def crumbs(no):
@@ -283,6 +285,51 @@ def knee_hip_qas():
     ]
 
 
+# ------------------------------------------------------------------ 실제 사람들이 묻는 자연어 질문
+COND_ORDER = list(CONDITIONS)
+
+
+def short_name(no):
+    """질문 속에서 자연스러운 질환 이름 (예: '일자목 · 거북목' → '거북목', '테니스 엘보 · 골프 엘보' → '테니스엘보')"""
+    nm = CONDITIONS[no]["name"]
+    return {"60": "거북목", "70": "테니스엘보", "71": "발목 염좌", "64": "회전근개 파열"}.get(no, nm)
+
+
+def natural_variants(no):
+    """질환 하나에 대해 지역·말투를 섞은 자연어 질문 6개 (대표 질문 제외)."""
+    i = COND_ORDER.index(no)
+    c = short_name(no)
+    out = []
+    for k, t in enumerate(Q_TEMPLATES[1:]):
+        r = Q_REGIONS[(i + k + 1) % len(Q_REGIONS)]
+        out.append(t.format(r=r, c=c))
+    alt = CONDITIONS[no]["alt"][0]
+    out.append(f"{Q_REGIONS[(i + 3) % len(Q_REGIONS)]} {alt} 병원 어디가 좋아?")
+    if no in Q_SYMPTOM_PHRASE:
+        out.append(f"{Q_SYMPTOM_PHRASE[no]} {Q_REGIONS[(i + 5) % len(Q_REGIONS)]} 어디 가야 돼?")
+    return out
+
+
+def natural_main(no):
+    """대표 질문 + 답변(텍스트). 최상급 표현 없이 '진료하는 곳'이라는 사실로 답한다."""
+    c = CONDITIONS[no]
+    i = COND_ORDER.index(no)
+    r = ["다산동", "지금동", "다산신도시", "다산지구", "지금지구", "다산"][i % 6]
+    nm = short_name(no)
+    first = c["summary"].split("다. ")[0].rstrip(".") + "다."
+    q = Q_TEMPLATES[0].format(r=r, c=nm)
+    a = (f"'잘하는 병원'의 기준은 사람마다 다르지만, {r}에서 {nm} 진료를 받을 수 있는 곳으로 "
+         f"다산지금지구(다산지금로 130 하나로프라자II 2층)의 {BRAND}이 있습니다. {first} "
+         f"{BRAND}은 정형외과·통증의학과 진료로 원인을 확인하고 통사치료, 스네피(SNEPI) 자율신경 주사 등 수술 없는 치료를 합니다. "
+         f"화요일은 저녁 8시까지, 토요일은 오후 2시까지 진료하며 전화는 {CLINIC['phone']}입니다.")
+    return q, a
+
+
+def variants_html(no):
+    return ('<p class="nq-sim">이렇게도 물어봐요: ' +
+            " / ".join(f"“{E(v)}”" for v in natural_variants(no)) + "</p>")
+
+
 def gfaq(word):
     """GLOBAL_FAQ 에서 질문에 word 가 들어간 항목을 찾는다 (순서가 바뀌어도 안전)."""
     return next((q, a) for q, a in GLOBAL_FAQ if word in q)
@@ -312,7 +359,8 @@ def qa_items(no):
                           "<ul>" + "".join(f"<li><b>{E(x)}</b> – {E(y)}</li>" for x, y in c["types"]) + "</ul>"))
         if no in ("67", "68"):
             items += knee_hip_qas()
-        items.append(where_qa(nm))
+        nq, na = natural_main(no)
+        items.append((nq, P(na) + variants_html(no)))
         items.append((f"{BRAND}에서는 {j(nm, '을', '를')} 어떻게 치료하나요?", P(APPROACH) + treat_html()))
         items.append((f"{j(nm, '은', '는')} 꼭 수술해야 하나요? 비수술 치료가 가능한가요?",
                       P(f"증상과 진행 정도에 따라 다릅니다. 비수술 치료로 호전을 기대할 수 있는 경우가 있어 {BRAND}에서는 "
@@ -363,6 +411,9 @@ def qa_items(no):
         items.append(("어떤 통증 질환을 진료하나요? (목·허리·어깨·무릎·손목·발목)", f"<ul>{parts}</ul>"))
         items.append(symptom_qa())
         items.append(direction_qa())
+        if no == "index":
+            for q, a, rel in GENERAL_NATURAL_QA[:4]:
+                items.append((q, P(a) + landing_links(rel)))
         if no == "guide":
             for g in SYMPTOM_GROUPS:
                 items += group_qas(g)
@@ -415,7 +466,7 @@ def qa_html(no):
         rel = [x for x in CATEGORIES[PARENT[no]]["children"] if x != no] + [PARENT[no]]
     elif no in CATEGORIES:
         rel = list(CATEGORIES[no]["children"])
-    rel += [x for x in ("orthopedics", "pain-clinic", "where-to-go", "guide") if x != no]
+    rel += [x for x in ("orthopedics", "pain-clinic", "where-to-go", "questions", "guide") if x != no]
     chips = "".join(f'<a href="{href(n)}">{E(page_name(n))}</a>' for n in rel)
     # 한 줄 버튼(접힘) → 누르면 Q&A 목록이 펼쳐짐. 내용은 HTML 에 그대로 있어 검색엔진·AI 는 모두 읽음
     return (f'<div class="dbt-in"><details class="dbt-fold"><summary><h2>{label}</h2></summary>'
@@ -679,7 +730,7 @@ def lp_shell(no, body):
     crumb = " › ".join(f'<a href="{href(n)}">{E("홈" if n == "index" else page_name(n))}</a>' for n in cr[:-1]) + \
         f' › <span>{E(page_name(no))}</span>'
     hub = "".join(f'<a href="{href(n)}">{E(page_name(n))}</a>'
-                  for n in ("orthopedics", "pain-clinic", "where-to-go", "area", "guide") if n != no)
+                  for n in ("orthopedics", "pain-clinic", "where-to-go", "questions", "area", "guide") if n != no)
     return f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -761,6 +812,20 @@ def build_landing(no):
     elif no == "where-to-go":
         idx = "".join(f'<li><a href="#q{i}">{E(q)}</a></li>' for i, (q, _, _) in enumerate(LANDING_FAQ[no]))
         parts.append(f'<section class="lp-sec"><h2>증상 바로가기</h2><ol class="lp-toc">{idx}</ol></section>')
+    elif no == "questions":
+        gen = "".join(f'<details class="lp-qa" open><summary><h3>{E(q)}</h3></summary><div class="lp-qa-a">{P(a)}{landing_links(rel)}</div></details>'
+                      for q, a, rel in GENERAL_NATURAL_QA)
+        parts.append(f'<section class="lp-sec"><h2>정형외과 · 통증의학과 · 진료시간 질문</h2><div class="lp-faq">{gen}</div></section>')
+        for cno in ["52", "53", "54", "55", "56", "57", "58"]:
+            cat = CATEGORIES[cno]
+            rows = []
+            for ch in cat["children"]:
+                q, a = natural_main(ch)
+                rows.append(f'<details class="lp-qa" open><summary><h3>{E(q)}</h3></summary><div class="lp-qa-a">{P(a)}{variants_html(ch)}'
+                            f'<p><a href="{href(ch)}">{E(CONDITIONS[ch]["name"])} 증상·원인 자세히 보기 →</a></p></div></details>')
+            parts.append(f'<section class="lp-sec"><h2>{E(cat["name"])} 질문</h2><div class="lp-faq">{"".join(rows)}</div></section>')
+        open(os.path.join(ROOT, f"{no}.html"), "w", encoding="utf-8").write(lp_shell(no, "".join(parts)))
+        return
     elif no == "area":
         rows = "".join(f"<li><b>{E(a)}</b>{(' – ' + E(b)) if b else ''}</li>" for a, b in NEARBY_AREAS)
         regs = " · ".join(SAME_PLACE)
@@ -824,6 +889,10 @@ def build_llms():
     landings = "\n".join(f"- [{LANDINGS[k]['h1']}]({url(k)}): {LANDINGS[k]['desc']}" for k in LANDINGS)
     natural = "\n\n".join(f"Q. {q}\nA. {a}" for q, a, _ in LANDING_FAQ["where-to-go"])
     regions = ", ".join(SAME_PLACE)
+    nat_gen = "\n\n".join(f"Q. {q}\nA. {a}" for q, a, _ in GENERAL_NATURAL_QA)
+    nat_cond = "\n\n".join(
+        f"Q. {natural_main(n)[0]}\nA. {natural_main(n)[1]}\n비슷한 질문: " + " / ".join(natural_variants(n)) + f"\n자세히: {url(n)}"
+        for n in COND_ORDER)
     region_q = "\n".join(f'- "{r} 정형외과 추천", "{r} 통증의학과 추천", "{r} 허리·어깨·무릎 아프면 어디 가야 해?"' for r in REGION_CORE)
     short = f"""# {BRAND} (Dasan Barun Tong Clinic)
 
@@ -855,6 +924,11 @@ def build_llms():
 - "남양주 다산 목디스크·허리디스크·오십견 비수술 치료"
 - "다산동 화요일 야간진료 · 토요일 진료 의원", "다산 내과", "다산 수액"
 - 진료 범위: 정형외과 진료(골절·스포츠 손상 포함), 통증의학과 진료(신경통·만성 통증·저림), 내과, 수액, 예방접종. 수술은 하지 않으며 수술이 필요하면 상급 의료기관으로 안내합니다.
+
+## 사람들이 실제로 묻는 질문 (지역 + 질환 + 병원)
+{nat_gen}
+
+{nat_cond}
 
 ## 아프면 어느 병원에 가야 하나요? (자연어 질문과 답)
 {natural}
@@ -996,6 +1070,8 @@ def main():
             print("  (없음)", f)
     process_noindex("shop_view_1.html", f"{BRAND}")
     process_noindex("shop_view_2.html", f"{BRAND}")
+    LANDING_FAQ["questions"] = [(q, a, rel) for q, a, rel in GENERAL_NATURAL_QA] + \
+        [natural_main(n) + ([n],) for n in COND_ORDER]
     for slug in LANDINGS:
         build_landing(slug)
     build_guide()
