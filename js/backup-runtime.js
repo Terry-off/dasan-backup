@@ -303,9 +303,37 @@
   });
 
   /* ============================================================
+   *  지도 이미지 대체 (원본 imweb 지도 서버가 응답하지 않을 때)
+   *  '오시는 길' 지도는 map-api.imweb.me 에서 불러온다. 원본 사이트 만료 후 그 서버가
+   *  이미지를 주지 않으면 빈 칸이 되므로, 불러오기에 실패한 경우에만 네이버 지도 링크로 바꾼다.
+   * ============================================================ */
+  var MAP_LINK = 'https://map.naver.com/p/search/%EB%8B%A4%EC%82%B0%EB%B0%94%EB%A5%B8%ED%86%B5%EC%9D%98%EC%9B%90';
+  function fixMaps() {
+    var els = document.querySelectorAll('.image-map-container');
+    Array.prototype.forEach.call(els, function (el) {
+      var m = /url\(["']?(https:\/\/map-api\.imweb\.me[^"')]+)/.exec(el.getAttribute('style') || '');
+      if (!m) return;
+      var img = new Image();
+      img.onerror = function () {
+        el.style.backgroundImage = 'none';
+        el.style.background = '#f3f5f9';
+        el.style.display = 'flex';
+        el.style.alignItems = 'center';
+        el.style.justifyContent = 'center';
+        el.innerHTML = '<a href="' + MAP_LINK + '" target="_blank" rel="noopener" ' +
+          'style="display:block;text-align:center;color:#2b529f;text-decoration:none;padding:20px;line-height:1.7">' +
+          '<b style="display:inline-block;background:#043a85;color:#fff;border-radius:30px;padding:8px 22px;margin-bottom:10px">' +
+          '네이버 지도에서 위치 보기</b><br>경기도 남양주시 다산지금로 130, 하나로프라자II 2층</a>';
+      };
+      img.src = m[1];
+    });
+  }
+
+  /* ============================================================
    *  부팅
    * ============================================================ */
   function boot() {
+    try { if (!EDIT) fixMaps(); } catch (e) {}
     configPromise.then(function (cfg) {
       applyOverrides(cfg);
       renderPopups(cfg);

@@ -644,6 +644,9 @@ def process(fname, no):
     s = re.sub(r'(href=["\'](?:\./|/)?css/backup\.css)(?:\?v=[\w]+)?', r"\g<1>?v=" + ASSET_VER["css"], s)
     s = re.sub(r'(src=["\'](?:\./|/)?js/backup-runtime\.js)(?:\?v=[\w]+)?', r"\g<1>?v=" + ASSET_VER["js"], s)
 
+    # 백업 사이트에서 동작하지 않는 imweb 회원 기능 링크(로그아웃 등) → 404 방지
+    s = re.sub(r'(href=["\'])/(?:logout|login|join|my)\.cm[^"\']*', r"\1/", s)
+
     # 내부 링크 → 정식 주소
     s = re.sub(r'(href=["\'])(?:\./)?(\d+)\.html(?=["\'#?])', r"\1/\2", s)
     s = re.sub(r'(href=["\'])(?:\./)?index\.html(?=["\'#?])', r"\1/", s)
