@@ -1,0 +1,50 @@
+# 사이트가 main 에 반영될 때마다 IndexNow 로 바뀐 주소를 검색엔진(Bing·네이버 등)에 자동 알림
+#  - Bing 은 ChatGPT 검색이 참고하는 주요 색인이라, 반영 속도를 앞당기는 효과가 있음
+#  - 키 파일: /d4f1b9a2c7e84f0a9b3d6e5c1a2f7b80.txt (tools/seo/inject.py 가 생성)
+name: IndexNow 알림
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "*.html"
+      - "sitemap.xml"
+      - "llms.txt"
+      - "llms-full.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: GitHub Pages 배포가 끝날 때까지 대기
+        run: sleep 150
+
+      - name: IndexNow 제출
+        env:
+          HOST: www.dasanbaruntong.com
+          KEY: d4f1b9a2c7e84f0a9b3d6e5c1a2f7b80
+        run: |
+          python3 - <<'PY'
+          import json, os, re, urllib.request
+          host, key = os.environ["HOST"], os.environ["KEY"]
+          urls = re.findall(r"<loc>([^<]+)</loc>", open("sitemap.xml", encoding="utf-8").read())
+          urls += [f"https://{host}/llms.txt", f"https://{host}/llms-full.txt"]
+          body = json.dumps({"host": host, "key": key,
+                             "keyLocation": f"https://{host}/{key}.txt",
+                             "urlList": urls}).encode()
+          for endpoint in ("https://api.indexnow.org/indexnow", "https://www.bing.com/indexnow",
+                           "https://searchadvisor.naver.com/indexnow"):
+              req = urllib.request.Request(endpoint, data=body,
+                                           headers={"Content-Type": "application/json; charset=utf-8"})
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as r:
+                      print(endpoint, r.status, len(urls), "URLs")
+              except Exception as e:  # 한 곳이 실패해도 나머지는 계속
+                  print(endpoint, "실패:", e)
+          PY

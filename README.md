@@ -222,5 +222,18 @@ git push
 | 새 파일 | `guide.html`(질환 안내 허브, /guide) · `llms.txt` · `llms-full.txt`(AI 용 요약) · IndexNow 키 |
 | robots / sitemap | GPTBot · ClaudeBot · PerplexityBot · Google · Bing · 네이버(Yeti) 명시 허용, 쇼핑 샘플·빈 게시판은 색인 제외 |
 
+### AI 검색(GEO) 전용 페이지
+
+| 주소 | 대상 질문 |
+|---|---|
+| `/orthopedics` | "다산 정형외과 추천해줘", "다산지금지구 정형외과" |
+| `/pain-clinic` | "다산 통증의학과 추천해줘", 신경통·저림·만성 통증 |
+| `/where-to-go` | "허리 아프면 어디 가야 해?" 같은 증상별 자연어 질문 15개 |
+| `/area` | 다산동·지금동·다산지구·지금지구·다산신도시·도농·구리 지역 질문 |
+| `/guide` | 질환 16종 증상·원인 안내 |
+
+내용은 `tools/seo/landing_data.py`, 디자인은 `css/landing.css` 에서 고칩니다.
+`main` 에 반영될 때마다 `.github/workflows/indexnow.yml` 이 바뀐 주소를 Bing·네이버(IndexNow)에 자동으로 알립니다.
+
 **진료시간·전화·주소·질환 설명을 바꿀 때는 `tools/seo/seo_data.py` 만 고치고 다시 실행**하면 모든 페이지·llms.txt 에 반영됩니다.
 (의료광고 심의 기준상 '최고/최초/유일/완치' 같은 표현은 넣지 마세요.)
